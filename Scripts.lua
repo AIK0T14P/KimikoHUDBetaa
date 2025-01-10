@@ -61,8 +61,7 @@ local Languages = {
             LowQualityWater = "Low Quality Water",
             DisableSunRays = "Disable Sun Rays",
             DisableAtmosphere = "Disable Atmosphere"
-        },
-        loading = "Loading..."
+        }
     },
     ["Español"] = {
         categories = {
@@ -110,52 +109,12 @@ local Languages = {
             LowQualityWater = "Agua de Baja Calidad",
             DisableSunRays = "Desactivar Rayos de Sol",
             DisableAtmosphere = "Desactivar Atmósfera"
-        },
-        loading = "Cargando..."
+        }
     }
 }
 
 local CurrentLanguage = "English"
 local Texts = Languages[CurrentLanguage]
-
--- Crear pantalla de carga
-local LoadingGui = Instance.new("ScreenGui")
-LoadingGui.Name = "LoadingGui"
-LoadingGui.ResetOnSpawn = false
-LoadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-LoadingGui.Parent = game.CoreGui
-
-local LoadingFrame = Instance.new("Frame")
-LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-LoadingFrame.Parent = LoadingGui
-
-local LoadingBar = Instance.new("Frame")
-LoadingBar.Size = UDim2.new(0.4, 0, 0.02, 0)
-LoadingBar.Position = UDim2.new(0.3, 0, 0.5, 0)
-LoadingBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-LoadingBar.BorderSizePixel = 0
-LoadingBar.Parent = LoadingFrame
-
-local LoadingFill = Instance.new("Frame")
-LoadingFill.Size = UDim2.new(0, 0, 1, 0)
-LoadingFill.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
-LoadingFill.BorderSizePixel = 0
-LoadingFill.Parent = LoadingBar
-
-local LoadingText = Instance.new("TextLabel")
-LoadingText.Size = UDim2.new(0, 200, 0, 30)
-LoadingText.Position = UDim2.new(0.5, -100, 0.45, -15)
-LoadingText.BackgroundTransparency = 1
-LoadingText.Font = Enum.Font.GothamBold
-LoadingText.Text = Texts.loading
-LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoadingText.TextSize = 18
-LoadingText.Parent = LoadingFrame
-
--- Animación de carga
-local loadingTween = TweenService:Create(LoadingFill, TweenInfo.new(3), {Size = UDim2.new(1, 0, 1, 0)})
-loadingTween:Play()
 
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
@@ -185,7 +144,7 @@ MainBorder.Size = UDim2.new(0, 610, 0, 410)
 MainBorder.Position = UDim2.new(0.5, -305, 0.5, -205)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
-MainBorder.Visible = false
+MainBorder.Visible = true
 MainBorder.Parent = ScreenGui
 
 -- Añadir gradiente al borde
@@ -760,6 +719,7 @@ end
 
 local function ServerHop()
     local HttpService = game:GetService("HttpService")
+    
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
     
@@ -1122,13 +1082,6 @@ end)
 
 -- Mostrar la primera sección por defecto
 ShowSection("Home")
-
--- Ocultar la pantalla de carga y mostrar la GUI principal
-loadingTween.Completed:Connect(function()
-    LoadingGui:Destroy()
-    ScreenGui.Enabled = true
-    MainBorder.Visible = true
-end)
 
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
