@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
+local Stats = game:GetService("Stats")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -17,6 +18,7 @@ local Camera = workspace.CurrentCamera
 local Languages = {
     ["English"] = {
         categories = {
+            Home = "Home",
             Movement = "Movement",
             Combat = "Combat",
             Visuals = "Visuals",
@@ -27,6 +29,7 @@ local Languages = {
             Settings = "Settings"
         },
         features = {
+            ServerInfo = "Server Info",
             Fly = "Fly",
             Speed = "Speed",
             SuperJump = "Super Jump",
@@ -53,12 +56,21 @@ local Languages = {
             LowGraphics = "Low Graphics",
             DisableEffects = "Disable Effects",
             ReduceTextures = "Reduce Textures",
-            DisableLighting = "Disable Lighting"
+            DisableLighting = "Disable Lighting",
+            RemoveReflections = "Remove Reflections",
+            DisableSunRays = "Disable Sun Rays",
+            DisableShadows = "Disable Shadows",
+            LowQualityMeshes = "Low Quality Meshes",
+            DisableAtmosphere = "Disable Atmosphere",
+            DisableWater = "Disable Water Effects",
+            FPSBoost = "FPS Boost",
+            MemoryOptimization = "Memory Optimization"
         },
         loading = "Loading..."
     },
     ["Español"] = {
         categories = {
+            Home = "Inicio",
             Movement = "Movimiento",
             Combat = "Combate",
             Visuals = "Visuales",
@@ -69,6 +81,7 @@ local Languages = {
             Settings = "Ajustes"
         },
         features = {
+            ServerInfo = "Info del Servidor",
             Fly = "Volar",
             Speed = "Velocidad",
             SuperJump = "Super Salto",
@@ -95,7 +108,15 @@ local Languages = {
             LowGraphics = "Gráficos Bajos",
             DisableEffects = "Desactivar Efectos",
             ReduceTextures = "Reducir Texturas",
-            DisableLighting = "Desactivar Iluminación"
+            DisableLighting = "Desactivar Iluminación",
+            RemoveReflections = "Quitar Reflejos",
+            DisableSunRays = "Desactivar Rayos de Sol",
+            DisableShadows = "Desactivar Sombras",
+            LowQualityMeshes = "Mallas de Baja Calidad",
+            DisableAtmosphere = "Desactivar Atmósfera",
+            DisableWater = "Desactivar Efectos de Agua",
+            FPSBoost = "Aumento de FPS",
+            MemoryOptimization = "Optimización de Memoria"
         },
         loading = "Cargando..."
     }
@@ -205,30 +226,47 @@ MainCorner.Parent = MainFrame
 
 -- Título "Kimiko HUD Beta"
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Position = UDim2.new(0, 0, 0, 10)
-Title.BackgroundTransparency = 1
+local TitleHeight = 50
+Title.Size = UDim2.new(1, 0, 0, TitleHeight)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Kimiko HUD Beta"
-Title.TextColor3 = Color3.fromRGB(147, 112, 219)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 24
 Title.Parent = MainFrame
 
--- Sidebar
-local Sidebar = Instance.new("Frame")
+-- Gradiente para el desvanecido del título
+local TitleGradient = Instance.new("UIGradient")
+TitleGradient.Rotation = 90
+TitleGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0),
+    NumberSequenceKeypoint.new(0.8, 0),
+    NumberSequenceKeypoint.new(1, 1)
+})
+TitleGradient.Parent = Title
+
+-- Sidebar con scroll
+local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 150, 1, -50)
-Sidebar.Position = UDim2.new(0, 0, 0, 50)
+Sidebar.Size = UDim2.new(0, 150, 1, -TitleHeight)
+Sidebar.Position = UDim2.new(0, 0, 0, TitleHeight)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.1
 Sidebar.BorderSizePixel = 0
+Sidebar.ScrollBarThickness = 4
 Sidebar.Parent = MainFrame
+
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Padding = UDim.new(0, 5)
+SidebarLayout.Parent = Sidebar
 
 -- Contenedor principal
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -150, 1, -50)
-ContentFrame.Position = UDim2.new(0, 150, 0, 50)
+ContentFrame.Size = UDim2.new(1, -150, 1, -TitleHeight)
+ContentFrame.Position = UDim2.new(0, 150, 0, TitleHeight)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ContentFrame.BackgroundTransparency = 0.1
 ContentFrame.BorderSizePixel = 0
@@ -238,8 +276,7 @@ ContentFrame.Parent = MainFrame
 local function CreateCategory(name, icon, position)
     local CategoryButton = Instance.new("TextButton")
     CategoryButton.Name = name.."Category"
-    CategoryButton.Size = UDim2.new(1, -20, 0, 40)
-    CategoryButton.Position = UDim2.new(0, 10, 0, position + 20)
+    CategoryButton.Size = UDim2.new(1, -10, 0, 40)
     CategoryButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     CategoryButton.BorderSizePixel = 0
     CategoryButton.Font = Enum.Font.GothamSemibold
@@ -248,7 +285,7 @@ local function CreateCategory(name, icon, position)
     
     local IconImage = Instance.new("ImageLabel")
     IconImage.Size = UDim2.new(0, 20, 0, 20)
-    IconImage.Position = UDim2.new(0, 2, 0.5, -10)
+    IconImage.Position = UDim2.new(0, 5, 0.5, -10)
     IconImage.BackgroundTransparency = 1
     IconImage.Image = icon
     IconImage.Parent = CategoryButton
@@ -259,7 +296,7 @@ local function CreateCategory(name, icon, position)
     CategoryButton.AutoButtonColor = false
     
     local TextPadding = Instance.new("UIPadding")
-    TextPadding.PaddingLeft = UDim.new(0, 25)
+    TextPadding.PaddingLeft = UDim.new(0, 30)
     TextPadding.Parent = CategoryButton
     
     local Corner = Instance.new("UICorner")
@@ -431,6 +468,51 @@ local function CreateSlider(name, section, callback, min, max, default)
     return function()
         return Value
     end
+end
+
+-- Función para crear un campo de entrada de texto
+local function CreateTextInput(name, section, callback)
+    local InputFrame = Instance.new("Frame")
+    InputFrame.Size = UDim2.new(1, 0, 0, 40)
+    InputFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    InputFrame.Parent = section
+    
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = InputFrame
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.3, 0, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.GothamSemibold
+    Label.Text = Texts.features[name]
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextSize = 14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = InputFrame
+    
+    local TextBox = Instance.new("TextBox")
+    TextBox.Size = UDim2.new(0.7, -10, 1, -10)
+    TextBox.Position = UDim2.new(0.3, 5, 0, 5)
+    TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    TextBox.BorderSizePixel = 0
+    TextBox.Font = Enum.Font.Gotham
+    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextBox.TextSize = 14
+    TextBox.PlaceholderText = "Enter text..."
+    TextBox.Parent = InputFrame
+    
+    local TextBoxCorner = Instance.new("UICorner")
+    TextBoxCorner.CornerRadius = UDim.new(0, 4)
+    TextBoxCorner.Parent = TextBox
+    
+    TextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            callback(TextBox.Text)
+        end
+    end)
+    
+    return TextBox
 end
 
 -- Funciones de habilidades mejoradas
@@ -708,11 +790,11 @@ local function RemoveTextures(enabled)
     end
 end
 
-local function ChatSpam(enabled)
+local function ChatSpam(enabled, message)
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Spam message", "All")
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
             wait(1)
         end)
     else
@@ -744,8 +826,98 @@ local function ServerHop()
     end
 end
 
+-- Nuevas funciones de optimización
+local function RemoveReflections(enabled)
+    if enabled then
+        game.Lighting.EnvironmentDiffuseScale = 0
+        game.Lighting.EnvironmentSpecularScale = 0
+    else
+        game.Lighting.EnvironmentDiffuseScale = 1
+        game.Lighting.EnvironmentSpecularScale = 1
+    end
+end
+
+local function DisableSunRays(enabled)
+    if enabled then
+        game.Lighting.SunRays.Enabled = false
+    else
+        game.Lighting.SunRays.Enabled = true
+    end
+end
+
+local function DisableShadows(enabled)
+    if enabled then
+        game.Lighting.GlobalShadows = false
+    else
+        game.Lighting.GlobalShadows = true
+    end
+end
+
+local function LowQualityMeshes(enabled)
+    if enabled then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("MeshPart") then
+                v.RenderFidelity = Enum.RenderFidelity.Performance
+            end
+        end
+    else
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("MeshPart") then
+                v.RenderFidelity = Enum.RenderFidelity.Precise
+            end
+        end
+    end
+end
+
+local function DisableAtmosphere(enabled)
+    if enabled then
+        game.Lighting.Atmosphere.Enabled = false
+    else
+        game.Lighting.Atmosphere.Enabled = true
+    end
+end
+
+local function DisableWater(enabled)
+    if enabled then
+        workspace.Terrain.WaterWaveSize = 0
+        workspace.Terrain.WaterWaveSpeed = 0
+        workspace.Terrain.WaterReflectance = 0
+        workspace.Terrain.WaterTransparency = 1
+    else
+        workspace.Terrain.WaterWaveSize = 0.15
+        workspace.Terrain.WaterWaveSpeed = 10
+        workspace.Terrain.WaterReflectance = 1
+        workspace.Terrain.WaterTransparency = 0.3
+    end
+end
+
+local function FPSBoost(enabled)
+    if enabled then
+        settings().Rendering.QualityLevel = 1
+        UserSettings():GetService("UserGameSettings").MasterGraphicsQualityLevel = 1
+    else
+        settings().Rendering.QualityLevel = 7
+        UserSettings():GetService("UserGameSettings").MasterGraphicsQualityLevel = 7
+    end
+end
+
+local function MemoryOptimization(enabled)
+    if enabled then
+        game:GetService("ContentProvider"):SetBaseURL("")
+        game:GetService("ContentProvider"):SetAssetUrl("")
+        game:GetService("ContentProvider"):SetAssetVersionURL("")
+        settings().Rendering.EagerBulkExecution = false
+    else
+        game:GetService("ContentProvider"):SetBaseURL("http://www.roblox.com/asset/")
+        game:GetService("ContentProvider"):SetAssetUrl("http://assetgame.roblox.com/asset/")
+        game:GetService("ContentProvider"):SetAssetVersionURL("http://assetgame.roblox.com/Asset/")
+        settings().Rendering.EagerBulkExecution = true
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
+    {name = "Home", icon = "rbxassetid://3926305904"},
     {name = "Movement", icon = "rbxassetid://3926307971"},
     {name = "Combat", icon = "rbxassetid://3926307971"},
     {name = "Visuals", icon = "rbxassetid://3926307971"},
@@ -766,6 +938,34 @@ for i, category in ipairs(Categories) do
 end
 
 -- Características actualizadas
+local HomeFeatures = {
+    {name = "ServerInfo", callback = function()
+        local serverInfo = Instance.new("TextLabel")
+        serverInfo.Size = UDim2.new(1, -20, 0, 100)
+        serverInfo.Position = UDim2.new(0, 10, 0, 10)
+        serverInfo.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        serverInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
+        serverInfo.Font = Enum.Font.GothamSemibold
+        serverInfo.TextSize = 14
+        serverInfo.TextWrapped = true
+        serverInfo.Parent = Sections.Home
+        
+        local function updateServerInfo()
+            local players = #Players:GetPlayers()
+            local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
+            local fps = math.floor(1 / RunService.RenderStepped:Wait())
+            local serverId = game.JobId
+            
+            serverInfo.Text = string.format(
+                "Players: %d\nPing: %d ms\nFPS: %d\nServer ID: %s",
+                players, ping, fps, serverId
+            )
+        end
+        
+        RunService.RenderStepped:Connect(updateServerInfo)
+    end}
+}
+
 local MovementFeatures = {
     {name = "Fly", callback = ToggleFly},
     {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
@@ -848,11 +1048,25 @@ local OptimizationFeatures = {
             game:GetService("Lighting").ShadowSoftness = 0.5
             game:GetService("Lighting").Technology = Enum.Technology.Future
         end
-    end}
+    end},
+    {name = "RemoveReflections", callback = RemoveReflections},
+    {name = "DisableSunRays", callback = DisableSunRays},
+    {name = "DisableShadows", callback = DisableShadows},
+    {name = "LowQualityMeshes", callback = LowQualityMeshes},
+    {name = "DisableAtmosphere", callback = DisableAtmosphere},
+    {name = "DisableWater", callback = DisableWater},
+    {name = "FPSBoost", callback = FPSBoost},
+    {name = "MemoryOptimization", callback = MemoryOptimization}
 }
 
 local MiscFeatures = {
-    {name = "ChatSpam", callback = ChatSpam},
+    {name = "ChatSpam", callback = function(enabled)
+        local spamMessage = ""
+        local textBox = CreateTextInput("ChatSpam", Sections.Misc, function(text)
+            spamMessage = text
+        end)
+        ChatSpam(enabled, spamMessage)
+    end},
     {name = "AutoFarm", callback = AutoFarm},
     {name = "ServerHop", callback = ServerHop}
 }
@@ -891,6 +1105,10 @@ local SettingsFeatures = {
 }
 
 -- Crear toggles y sliders para cada característica
+for _, feature in ipairs(HomeFeatures) do
+    feature.callback()
+end
+
 for _, feature in ipairs(MovementFeatures) do
     if feature.slider then
         CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
@@ -970,7 +1188,7 @@ end)
 LoadingGui:Destroy()
 
 -- Mostrar la primera sección por defecto
-ShowSection("Movement")
+ShowSection("Home")
 
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
