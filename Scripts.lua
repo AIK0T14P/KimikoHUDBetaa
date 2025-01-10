@@ -107,6 +107,8 @@ local Texts = Languages[CurrentLanguage]
 -- Crear pantalla de carga
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "LoadingGui"
+LoadingGui.ResetOnSpawn = false
+LoadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 LoadingGui.Parent = game.CoreGui
 
 local LoadingFrame = Instance.new("Frame")
@@ -138,13 +140,15 @@ LoadingText.TextSize = 18
 LoadingText.Parent = LoadingFrame
 
 -- Animación de carga
-TweenService:Create(LoadingFill, TweenInfo.new(3), {Size = UDim2.new(1, 0, 1, 0)}):Play()
-wait(3)
+local loadingTween = TweenService:Create(LoadingFill, TweenInfo.new(3), {Size = UDim2.new(1, 0, 1, 0)})
+loadingTween:Play()
+loadingTween.Completed:Wait()
 
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "EnhancedGui"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.CoreGui
 
 -- Botón para mostrar/ocultar
@@ -723,12 +727,6 @@ local function AutoFarm(enabled)
         print("Auto Farm enabled. Implement game-specific farming logic here.")
     else
         print("Auto Farm disabled.")
-    end
-end
-
-local function ServerHop()
-    local Http```lua
-Farm disabled.")
     end
 end
 
