@@ -156,7 +156,6 @@ LoadingText.Parent = LoadingFrame
 -- Animación de carga
 local loadingTween = TweenService:Create(LoadingFill, TweenInfo.new(3), {Size = UDim2.new(1, 0, 1, 0)})
 loadingTween:Play()
-loadingTween.Completed:Wait()
 
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
@@ -1121,11 +1120,15 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 end)
 
--- Eliminar la GUI de carga
-LoadingGui:Destroy()
-
 -- Mostrar la primera sección por defecto
 ShowSection("Home")
+
+-- Ocultar la pantalla de carga y mostrar la GUI principal
+loadingTween.Completed:Connect(function()
+    LoadingGui:Destroy()
+    ScreenGui.Enabled = true
+    MainBorder.Visible = true
+end)
 
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
