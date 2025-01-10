@@ -5,7 +5,6 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
-local Stats = game:GetService("Stats")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -29,7 +28,6 @@ local Languages = {
             Settings = "Settings"
         },
         features = {
-            ServerInfo = "Server Info",
             Fly = "Fly",
             Speed = "Speed",
             SuperJump = "Super Jump",
@@ -57,14 +55,12 @@ local Languages = {
             DisableEffects = "Disable Effects",
             ReduceTextures = "Reduce Textures",
             DisableLighting = "Disable Lighting",
-            RemoveReflections = "Remove Reflections",
+            RemoveShadows = "Remove Shadows",
+            RemoveParticles = "Remove Particles",
+            DisableBlur = "Disable Blur",
+            LowQualityWater = "Low Quality Water",
             DisableSunRays = "Disable Sun Rays",
-            DisableShadows = "Disable Shadows",
-            LowQualityMeshes = "Low Quality Meshes",
-            DisableAtmosphere = "Disable Atmosphere",
-            DisableWater = "Disable Water Effects",
-            FPSBoost = "FPS Boost",
-            MemoryOptimization = "Memory Optimization"
+            DisableAtmosphere = "Disable Atmosphere"
         },
         loading = "Loading..."
     },
@@ -81,7 +77,6 @@ local Languages = {
             Settings = "Ajustes"
         },
         features = {
-            ServerInfo = "Info del Servidor",
             Fly = "Volar",
             Speed = "Velocidad",
             SuperJump = "Super Salto",
@@ -109,14 +104,12 @@ local Languages = {
             DisableEffects = "Desactivar Efectos",
             ReduceTextures = "Reducir Texturas",
             DisableLighting = "Desactivar Iluminación",
-            RemoveReflections = "Quitar Reflejos",
+            RemoveShadows = "Quitar Sombras",
+            RemoveParticles = "Quitar Partículas",
+            DisableBlur = "Desactivar Desenfoque",
+            LowQualityWater = "Agua de Baja Calidad",
             DisableSunRays = "Desactivar Rayos de Sol",
-            DisableShadows = "Desactivar Sombras",
-            LowQualityMeshes = "Mallas de Baja Calidad",
-            DisableAtmosphere = "Desactivar Atmósfera",
-            DisableWater = "Desactivar Efectos de Agua",
-            FPSBoost = "Aumento de FPS",
-            MemoryOptimization = "Optimización de Memoria"
+            DisableAtmosphere = "Desactivar Atmósfera"
         },
         loading = "Cargando..."
     }
@@ -226,35 +219,25 @@ MainCorner.Parent = MainFrame
 
 -- Título "Kimiko HUD Beta"
 local Title = Instance.new("TextLabel")
-local TitleHeight = 50
-Title.Size = UDim2.new(1, 0, 0, TitleHeight)
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Kimiko HUD Beta"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(147, 112, 219)
 Title.TextSize = 24
 Title.Parent = MainFrame
 
--- Gradiente para el desvanecido del título
-local TitleGradient = Instance.new("UIGradient")
-TitleGradient.Rotation = 90
-TitleGradient.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0),
-    NumberSequenceKeypoint.new(0.8, 0),
-    NumberSequenceKeypoint.new(1, 1)
-})
-TitleGradient.Parent = Title
-
--- Sidebar con scroll
+-- Sidebar con scroll vertical
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 150, 1, -TitleHeight)
-Sidebar.Position = UDim2.new(0, 0, 0, TitleHeight)
+Sidebar.Size = UDim2.new(0, 150, 1, -50)
+Sidebar.Position = UDim2.new(0, 0, 0, 50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.1
 Sidebar.BorderSizePixel = 0
 Sidebar.ScrollBarThickness = 4
+Sidebar.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
 Sidebar.Parent = MainFrame
 
 local SidebarLayout = Instance.new("UIListLayout")
@@ -262,21 +245,30 @@ SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
 SidebarLayout.Padding = UDim.new(0, 5)
 SidebarLayout.Parent = Sidebar
 
--- Contenedor principal
+-- Contenedor principal con desvanecido
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -150, 1, -TitleHeight)
-ContentFrame.Position = UDim2.new(0, 150, 0, TitleHeight)
+ContentFrame.Size = UDim2.new(1, -150, 1, -50)
+ContentFrame.Position = UDim2.new(0, 150, 0, 50)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ContentFrame.BackgroundTransparency = 0.1
 ContentFrame.BorderSizePixel = 0
 ContentFrame.Parent = MainFrame
 
+local ContentGradient = Instance.new("UIGradient")
+ContentGradient.Rotation = 90
+ContentGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0),
+    NumberSequenceKeypoint.new(0.1, 1),
+    NumberSequenceKeypoint.new(1, 1)
+})
+ContentGradient.Parent = ContentFrame
+
 -- Función para crear categorías en el sidebar
 local function CreateCategory(name, icon, position)
     local CategoryButton = Instance.new("TextButton")
     CategoryButton.Name = name.."Category"
-    CategoryButton.Size = UDim2.new(1, -10, 0, 40)
+    CategoryButton.Size = UDim2.new(1, -20, 0, 40)
     CategoryButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     CategoryButton.BorderSizePixel = 0
     CategoryButton.Font = Enum.Font.GothamSemibold
@@ -285,7 +277,7 @@ local function CreateCategory(name, icon, position)
     
     local IconImage = Instance.new("ImageLabel")
     IconImage.Size = UDim2.new(0, 20, 0, 20)
-    IconImage.Position = UDim2.new(0, 5, 0.5, -10)
+    IconImage.Position = UDim2.new(0, 2, 0.5, -10)
     IconImage.BackgroundTransparency = 1
     IconImage.Image = icon
     IconImage.Parent = CategoryButton
@@ -296,7 +288,7 @@ local function CreateCategory(name, icon, position)
     CategoryButton.AutoButtonColor = false
     
     local TextPadding = Instance.new("UIPadding")
-    TextPadding.PaddingLeft = UDim.new(0, 30)
+    TextPadding.PaddingLeft = UDim.new(0, 25)
     TextPadding.Parent = CategoryButton
     
     local Corner = Instance.new("UICorner")
@@ -468,51 +460,6 @@ local function CreateSlider(name, section, callback, min, max, default)
     return function()
         return Value
     end
-end
-
--- Función para crear un campo de entrada de texto
-local function CreateTextInput(name, section, callback)
-    local InputFrame = Instance.new("Frame")
-    InputFrame.Size = UDim2.new(1, 0, 0, 40)
-    InputFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    InputFrame.Parent = section
-    
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = InputFrame
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0.3, 0, 1, 0)
-    Label.BackgroundTransparency = 1
-    Label.Font = Enum.Font.GothamSemibold
-    Label.Text = Texts.features[name]
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 14
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = InputFrame
-    
-    local TextBox = Instance.new("TextBox")
-    TextBox.Size = UDim2.new(0.7, -10, 1, -10)
-    TextBox.Position = UDim2.new(0.3, 5, 0, 5)
-    TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    TextBox.BorderSizePixel = 0
-    TextBox.Font = Enum.Font.Gotham
-    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextBox.TextSize = 14
-    TextBox.PlaceholderText = "Enter text..."
-    TextBox.Parent = InputFrame
-    
-    local TextBoxCorner = Instance.new("UICorner")
-    TextBoxCorner.CornerRadius = UDim.new(0, 4)
-    TextBoxCorner.Parent = TextBox
-    
-    TextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            callback(TextBox.Text)
-        end
-    end)
-    
-    return TextBox
 end
 
 -- Funciones de habilidades mejoradas
@@ -790,11 +737,11 @@ local function RemoveTextures(enabled)
     end
 end
 
-local function ChatSpam(enabled, message)
+local function ChatSpam(enabled)
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Spam message", "All")
             wait(1)
         end)
     else
@@ -826,95 +773,6 @@ local function ServerHop()
     end
 end
 
--- Nuevas funciones de optimización
-local function RemoveReflections(enabled)
-    if enabled then
-        game.Lighting.EnvironmentDiffuseScale = 0
-        game.Lighting.EnvironmentSpecularScale = 0
-    else
-        game.Lighting.EnvironmentDiffuseScale = 1
-        game.Lighting.EnvironmentSpecularScale = 1
-    end
-end
-
-local function DisableSunRays(enabled)
-    if enabled then
-        game.Lighting.SunRays.Enabled = false
-    else
-        game.Lighting.SunRays.Enabled = true
-    end
-end
-
-local function DisableShadows(enabled)
-    if enabled then
-        game.Lighting.GlobalShadows = false
-    else
-        game.Lighting.GlobalShadows = true
-    end
-end
-
-local function LowQualityMeshes(enabled)
-    if enabled then
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("MeshPart") then
-                v.RenderFidelity = Enum.RenderFidelity.Performance
-            end
-        end
-    else
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("MeshPart") then
-                v.RenderFidelity = Enum.RenderFidelity.Precise
-            end
-        end
-    end
-end
-
-local function DisableAtmosphere(enabled)
-    if enabled then
-        game.Lighting.Atmosphere.Enabled = false
-    else
-        game.Lighting.Atmosphere.Enabled = true
-    end
-end
-
-local function DisableWater(enabled)
-    if enabled then
-        workspace.Terrain.WaterWaveSize = 0
-        workspace.Terrain.WaterWaveSpeed = 0
-        workspace.Terrain.WaterReflectance = 0
-        workspace.Terrain.WaterTransparency = 1
-    else
-        workspace.Terrain.WaterWaveSize = 0.15
-        workspace.Terrain.WaterWaveSpeed = 10
-        workspace.Terrain.WaterReflectance = 1
-        workspace.Terrain.WaterTransparency = 0.3
-    end
-end
-
-local function FPSBoost(enabled)
-    if enabled then
-        settings().Rendering.QualityLevel = 1
-        UserSettings():GetService("UserGameSettings").MasterGraphicsQualityLevel = 1
-    else
-        settings().Rendering.QualityLevel = 7
-        UserSettings():GetService("UserGameSettings").MasterGraphicsQualityLevel = 7
-    end
-end
-
-local function MemoryOptimization(enabled)
-    if enabled then
-        game:GetService("ContentProvider"):SetBaseURL("")
-        game:GetService("ContentProvider"):SetAssetUrl("")
-        game:GetService("ContentProvider"):SetAssetVersionURL("")
-        settings().Rendering.EagerBulkExecution = false
-    else
-        game:GetService("ContentProvider"):SetBaseURL("http://www.roblox.com/asset/")
-        game:GetService("ContentProvider"):SetAssetUrl("http://assetgame.roblox.com/asset/")
-        game:GetService("ContentProvider"):SetAssetVersionURL("http://assetgame.roblox.com/Asset/")
-        settings().Rendering.EagerBulkExecution = true
-    end
-end
-
 -- Categorías actualizadas
 local Categories = {
     {name = "Home", icon = "rbxassetid://3926305904"},
@@ -939,30 +797,44 @@ end
 
 -- Características actualizadas
 local HomeFeatures = {
-    {name = "ServerInfo", callback = function()
-        local serverInfo = Instance.new("TextLabel")
-        serverInfo.Size = UDim2.new(1, -20, 0, 100)
-        serverInfo.Position = UDim2.new(0, 10, 0, 10)
-        serverInfo.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        serverInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
-        serverInfo.Font = Enum.Font.GothamSemibold
-        serverInfo.TextSize = 14
-        serverInfo.TextWrapped = true
-        serverInfo.Parent = Sections.Home
-        
-        local function updateServerInfo()
-            local players = #Players:GetPlayers()
-            local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
-            local fps = math.floor(1 / RunService.RenderStepped:Wait())
-            local serverId = game.JobId
-            
-            serverInfo.Text = string.format(
-                "Players: %d\nPing: %d ms\nFPS: %d\nServer ID: %s",
-                players, ping, fps, serverId
-            )
+    {name = "ServerInfo", callback = function(enabled)
+        local infoFrame = Instance.new("Frame")
+        infoFrame.Size = UDim2.new(1, 0, 0, 100)
+        infoFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        infoFrame.Parent = Sections.Home
+
+        local infoCorner = Instance.new("UICorner")
+        infoCorner.CornerRadius = UDim.new(0, 6)
+        infoCorner.Parent = infoFrame
+
+        local infoLayout = Instance.new("UIListLayout")
+        infoLayout.Padding = UDim.new(0, 5)
+        infoLayout.Parent = infoFrame
+
+        local function createInfoLabel(name, value)
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -20, 0, 20)
+            label.Position = UDim2.new(0, 10, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Font = Enum.Font.GothamSemibold
+            label.Text = name .. ": " .. value
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.TextSize = 14
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = infoFrame
+            return label
         end
-        
-        RunService.RenderStepped:Connect(updateServerInfo)
+
+        local playerCountLabel = createInfoLabel("Players", #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
+        local pingLabel = createInfoLabel("Ping", "N/A")
+        local fpsLabel = createInfoLabel("FPS", "N/A")
+        local serverLabel = createInfoLabel("Server", game.JobId)
+
+        RunService.RenderStepped:Connect(function()
+            playerCountLabel.Text = "Players: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers
+            pingLabel.Text = "Ping: " .. math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. " ms"
+            fpsLabel.Text = "FPS: " .. math.floor(1 / RunService.RenderStepped:Wait())
+        end)
     end}
 }
 
@@ -1049,24 +921,42 @@ local OptimizationFeatures = {
             game:GetService("Lighting").Technology = Enum.Technology.Future
         end
     end},
-    {name = "RemoveReflections", callback = RemoveReflections},
-    {name = "DisableSunRays", callback = DisableSunRays},
-    {name = "DisableShadows", callback = DisableShadows},
-    {name = "LowQualityMeshes", callback = LowQualityMeshes},
-    {name = "DisableAtmosphere", callback = DisableAtmosphere},
-    {name = "DisableWater", callback = DisableWater},
-    {name = "FPSBoost", callback = FPSBoost},
-    {name = "MemoryOptimization", callback = MemoryOptimization}
+    {name = "RemoveShadows", callback = function(enabled)
+        game:GetService("Lighting").GlobalShadows = not enabled
+    end},
+    {name = "RemoveParticles", callback = function(enabled)
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") then
+                v.Enabled = not enabled
+            end
+        end
+    end},
+    {name = "DisableBlur", callback = function(enabled)
+        game:GetService("Lighting").Blur.Enabled = not enabled
+    end},
+    {name = "LowQualityWater", callback = function(enabled)
+        if enabled then
+            workspace.Terrain.WaterWaveSize = 0
+            workspace.Terrain.WaterWaveSpeed = 0
+            workspace.Terrain.WaterReflectance = 0
+            workspace.Terrain.WaterTransparency = 1
+        else
+            workspace.Terrain.WaterWaveSize = 0.15
+            workspace.Terrain.WaterWaveSpeed = 10
+            workspace.Terrain.WaterReflectance = 1
+            workspace.Terrain.WaterTransparency = 0.3
+        end
+    end},
+    {name = "DisableSunRays", callback = function(enabled)
+        game:GetService("Lighting").SunRays.Enabled = not enabled
+    end},
+    {name = "DisableAtmosphere", callback = function(enabled)
+        game:GetService("Lighting").Atmosphere.Enabled = not enabled
+    end}
 }
 
 local MiscFeatures = {
-    {name = "ChatSpam", callback = function(enabled)
-        local spamMessage = ""
-        local textBox = CreateTextInput("ChatSpam", Sections.Misc, function(text)
-            spamMessage = text
-        end)
-        ChatSpam(enabled, spamMessage)
-    end},
+    {name = "ChatSpam", callback = ChatSpam},
     {name = "AutoFarm", callback = AutoFarm},
     {name = "ServerHop", callback = ServerHop}
 }
@@ -1106,7 +996,7 @@ local SettingsFeatures = {
 
 -- Crear toggles y sliders para cada característica
 for _, feature in ipairs(HomeFeatures) do
-    feature.callback()
+    CreateToggle(feature.name, Sections.Home, feature.callback)
 end
 
 for _, feature in ipairs(MovementFeatures) do
@@ -1138,7 +1028,54 @@ for _, feature in ipairs(OptimizationFeatures) do
 end
 
 for _, feature in ipairs(MiscFeatures) do
-    CreateToggle(feature.name, Sections.Misc, feature.callback)
+    if feature.name == "ChatSpam" then
+        local spamFrame = Instance.new("Frame")
+        spamFrame.Size = UDim2.new(1, 0, 0, 70)
+        spamFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        spamFrame.Parent = Sections.Misc
+
+        local spamCorner = Instance.new("UICorner")
+        spamCorner.CornerRadius = UDim.new(0, 6)
+        spamCorner.Parent = spamFrame
+
+        local spamToggle = CreateToggle(feature.name, spamFrame, feature.callback)
+
+        local spamInput = Instance.new("TextBox")
+        spamInput.Size = UDim2.new(1, -20, 0, 30)
+        spamInput.Position = UDim2.new(0, 10, 0, 35)
+        spamInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        spamInput.BorderSizePixel = 0
+        spamInput.Font = Enum.Font.GothamSemibold
+        spamInput.Text = "Enter spam message here"
+        spamInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+        spamInput.TextSize = 14
+        spamInput.Parent = spamFrame
+
+        local spamInputCorner = Instance.new("UICorner")
+        spamInputCorner.CornerRadius = UDim.new(0, 4)
+        spamInputCorner.Parent = spamInput
+
+        spamInput.FocusLost:Connect(function()
+            local newMessage = spamInput.Text
+            if newMessage ~= "" then
+                ChatSpam = function(enabled)
+                    local connection
+                    if enabled then
+                        connection = RunService.Heartbeat:Connect(function()
+                            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(newMessage, "All")
+                            wait(1)
+                        end)
+                    else
+                        if connection then
+                            connection:Disconnect()
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        CreateToggle(feature.name, Sections.Misc, feature.callback)
+    end
 end
 
 for _, feature in ipairs(SettingsFeatures) do
@@ -1192,3 +1129,4 @@ ShowSection("Home")
 
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+
