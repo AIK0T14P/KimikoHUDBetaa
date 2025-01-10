@@ -22,6 +22,7 @@ local Languages = {
             Visuals = "Visuals",
             Player = "Player",
             World = "World",
+            Optimization = "Optimization",
             Misc = "Misc",
             Settings = "Settings"
         },
@@ -48,7 +49,11 @@ local Languages = {
             ChatSpam = "Chat Spam",
             AutoFarm = "Auto Farm",
             ServerHop = "Server Hop",
-            Language = "Language"
+            Language = "Language",
+            LowGraphics = "Low Graphics",
+            DisableEffects = "Disable Effects",
+            ReduceTextures = "Reduce Textures",
+            DisableLighting = "Disable Lighting"
         },
         loading = "Loading..."
     },
@@ -59,6 +64,7 @@ local Languages = {
             Visuals = "Visuales",
             Player = "Jugador",
             World = "Mundo",
+            Optimization = "Optimización",
             Misc = "Misc",
             Settings = "Ajustes"
         },
@@ -85,7 +91,11 @@ local Languages = {
             ChatSpam = "Spam Chat",
             AutoFarm = "Auto Farm",
             ServerHop = "Cambiar Servidor",
-            Language = "Idioma"
+            Language = "Idioma",
+            LowGraphics = "Gráficos Bajos",
+            DisableEffects = "Desactivar Efectos",
+            ReduceTextures = "Reducir Texturas",
+            DisableLighting = "Desactivar Iluminación"
         },
         loading = "Cargando..."
     }
@@ -151,15 +161,25 @@ local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleButton
 
--- Frame Principal con borde morado
+-- Frame Principal con borde morado y gradiente
 local MainBorder = Instance.new("Frame")
 MainBorder.Name = "MainBorder"
 MainBorder.Size = UDim2.new(0, 610, 0, 410)
 MainBorder.Position = UDim2.new(0.5, -305, 0.5, -205)
-MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229) -- Morado más claro
+MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
 MainBorder.Visible = false
 MainBorder.Parent = ScreenGui
+
+-- Añadir gradiente al borde
+local UIGradient = Instance.new("UIGradient")
+UIGradient.Rotation = 90
+UIGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0),
+    NumberSequenceKeypoint.new(0.8, 0),
+    NumberSequenceKeypoint.new(1, 1)
+})
+UIGradient.Parent = MainBorder
 
 local MainBorderCorner = Instance.new("UICorner")
 MainBorderCorner.CornerRadius = UDim.new(0, 12)
@@ -171,7 +191,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(1, -4, 1, -4)
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.BackgroundTransparency = 0.1 -- Ligera transparencia
+MainFrame.BackgroundTransparency = 0.1
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = MainBorder
 
@@ -196,7 +216,7 @@ Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 150, 1, -50)
 Sidebar.Position = UDim2.new(0, 0, 0, 50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Sidebar.BackgroundTransparency = 0.1 -- Ligera transparencia
+Sidebar.BackgroundTransparency = 0.1
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MainFrame
 
@@ -206,7 +226,7 @@ ContentFrame.Name = "ContentFrame"
 ContentFrame.Size = UDim2.new(1, -150, 1, -50)
 ContentFrame.Position = UDim2.new(0, 150, 0, 50)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-ContentFrame.BackgroundTransparency = 0.1 -- Ligera transparencia
+ContentFrame.BackgroundTransparency = 0.1
 ContentFrame.BorderSizePixel = 0
 ContentFrame.Parent = MainFrame
 
@@ -215,7 +235,7 @@ local function CreateCategory(name, icon, position)
     local CategoryButton = Instance.new("TextButton")
     CategoryButton.Name = name.."Category"
     CategoryButton.Size = UDim2.new(1, -20, 0, 40)
-    CategoryButton.Position = UDim2.new(0, 10, 0, position + 20) -- Movido 20 píxeles más abajo
+    CategoryButton.Position = UDim2.new(0, 10, 0, position + 20)
     CategoryButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     CategoryButton.BorderSizePixel = 0
     CategoryButton.Font = Enum.Font.GothamSemibold
@@ -224,7 +244,7 @@ local function CreateCategory(name, icon, position)
     
     local IconImage = Instance.new("ImageLabel")
     IconImage.Size = UDim2.new(0, 20, 0, 20)
-    IconImage.Position = UDim2.new(0, 5, 0.5, -10)
+    IconImage.Position = UDim2.new(0, 2, 0.5, -10)
     IconImage.BackgroundTransparency = 1
     IconImage.Image = icon
     IconImage.Parent = CategoryButton
@@ -235,7 +255,7 @@ local function CreateCategory(name, icon, position)
     CategoryButton.AutoButtonColor = false
     
     local TextPadding = Instance.new("UIPadding")
-    TextPadding.PaddingLeft = UDim.new(0, 30)
+    TextPadding.PaddingLeft = UDim.new(0, 25)
     TextPadding.Parent = CategoryButton
     
     local Corner = Instance.new("UICorner")
@@ -421,7 +441,6 @@ local function ToggleFly(enabled)
         BV.Velocity = Vector3.new(0, 0.1, 0)
         BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
         
-        -- Conexión para el vuelo
         RunService:BindToRenderStep("Fly", 100, function()
             if not enabled then return end
             
@@ -437,7 +456,6 @@ local function ToggleFly(enabled)
             local lookVector = cameraCFrame.LookVector
             local rightVector = cameraCFrame.RightVector
             
-            -- Calcular la velocidad basada en la dirección de la cámara
             local velocity = (rightVector * moveDirection.X + cameraCFrame.UpVector * moveDirection.Y + lookVector * moveDirection.Z) * 50
             
             if velocity.Magnitude > 0 then
@@ -508,23 +526,38 @@ local function GodMode(enabled)
 end
 
 local function InfiniteJump(enabled)
-    UserInputService.JumpRequest:Connect(function()
-        if enabled then
+    local connection
+    if enabled then
+        connection = UserInputService.JumpRequest:Connect(function()
             Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end)
+    else
+        if connection then
+            connection:Disconnect()
         end
-    end)
+    end
 end
 
 local function NoClip(enabled)
-    RunService.Stepped:Connect(function()
-        if enabled then
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
             for _, part in pairs(Character:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.CanCollide = false
                 end
             end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
         end
-    end)
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
 end
 
 local function ESP(enabled)
@@ -532,6 +565,7 @@ local function ESP(enabled)
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character then
                 local highlight = Instance.new("Highlight")
+                highlight.Name = "ESPHighlight"
                 highlight.Parent = player.Character
                 highlight.FillColor = Color3.fromRGB(147, 112, 219)
                 highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
@@ -540,16 +574,19 @@ local function ESP(enabled)
         
         Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function(character)
-                local highlight = Instance.new("Highlight")
-                highlight.Parent = character
-                highlight.FillColor = Color3.fromRGB(147, 112, 219)
-                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                if enabled then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "ESPHighlight"
+                    highlight.Parent = character
+                    highlight.FillColor = Color3.fromRGB(147, 112, 219)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                end
             end)
         end)
     else
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character then
-                local highlight = player.Character:FindFirstChild("Highlight")
+                local highlight = player.Character:FindFirstChild("ESPHighlight")
                 if highlight then highlight:Destroy() end
             end
         end
@@ -573,36 +610,54 @@ local function Fullbright(enabled)
 end
 
 local function Tracers(enabled)
+    local tracers = {}
+    
     local function createTracer(player)
+        if player == LocalPlayer then return end
+        
         local tracer = Drawing.new("Line")
         tracer.Visible = false
         tracer.Color = Color3.new(1, 1, 1)
         tracer.Thickness = 1
         tracer.Transparency = 1
+        tracers[player] = tracer
         
-        RunService.RenderStepped:Connect(function()
-            if enabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local vector, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
-                if onScreen then
-                    tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                    tracer.To = Vector2.new(vector.X, vector.Y)
-                    tracer.Visible = true
-                else
-                    tracer.Visible = false
-                end
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if not enabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+                tracer.Visible = false
+                return
+            end
+            
+            local vector, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                tracer.To = Vector2.new(vector.X, vector.Y)
+                tracer.Visible = true
             else
                 tracer.Visible = false
             end
         end)
     end
     
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
+    if enabled then
+        for _, player in pairs(Players:GetPlayers()) do
             createTracer(player)
         end
+        
+        Players.PlayerAdded:Connect(createTracer)
+        Players.PlayerRemoving:Connect(function(player)
+            if tracers[player] then
+                tracers[player]:Remove()
+                tracers[player] = nil
+            end
+        end)
+    else
+        for _, tracer in pairs(tracers) do
+            tracer:Remove()
+        end
+        tracers = {}
     end
-    
-    Players.PlayerAdded:Connect(createTracer)
 end
 
 local function RemoveFog(enabled)
@@ -616,15 +671,15 @@ local function RemoveFog(enabled)
 end
 
 local function DayNight(enabled)
-    local dayNightLoop = nil
+    local connection
     if enabled then
-        dayNightLoop = RunService.Heartbeat:Connect(function()
+        connection = RunService.Heartbeat:Connect(function()
             local currentTime = tick() % 24
             game.Lighting.ClockTime = currentTime
         end)
     else
-        if dayNightLoop then
-            dayNightLoop:Disconnect()
+        if connection then
+            connection:Disconnect()
         end
         game.Lighting.ClockTime = 12
     end
@@ -650,15 +705,15 @@ local function RemoveTextures(enabled)
 end
 
 local function ChatSpam(enabled)
-    local spamLoop = nil
+    local connection
     if enabled then
-        spamLoop = RunService.Heartbeat:Connect(function()
+        connection = RunService.Heartbeat:Connect(function()
             game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Spam message", "All")
             wait(1)
         end)
     else
-        if spamLoop then
-            spamLoop:Disconnect()
+        if connection then
+            connection:Disconnect()
         end
     end
 end
@@ -668,6 +723,12 @@ local function AutoFarm(enabled)
         print("Auto Farm enabled. Implement game-specific farming logic here.")
     else
         print("Auto Farm disabled.")
+    end
+end
+
+local function ServerHop()
+    local Http```lua
+Farm disabled.")
     end
 end
 
@@ -692,23 +753,18 @@ local Categories = {
     {name = "Visuals", icon = "rbxassetid://3926307971"},
     {name = "Player", icon = "rbxassetid://3926307971"},
     {name = "World", icon = "rbxassetid://3926307971"},
+    {name = "Optimization", icon = "rbxassetid://3926307971"},
     {name = "Misc", icon = "rbxassetid://3926307971"},
     {name = "Settings", icon = "rbxassetid://3926307971"}
 }
 
 -- Crear categorías y secciones
 local Sections = {}
+local ActiveCategory = nil
+
 for i, category in ipairs(Categories) do
     local button = CreateCategory(category.name, category.icon, (i-1) * 50)
     Sections[category.name] = CreateSection(category.name)
-    
-    -- Añadir animación al botón
-    button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
-    end)
-    button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
-    end)
 end
 
 -- Características actualizadas
@@ -746,13 +802,63 @@ local WorldFeatures = {
     {name = "RemoveTextures", callback = RemoveTextures}
 }
 
+local OptimizationFeatures = {
+    {name = "LowGraphics", callback = function(enabled)
+        if enabled then
+            settings().Rendering.QualityLevel = 1
+            game:GetService("Lighting").GlobalShadows = false
+            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                    v.Enabled = false
+                end
+            end
+        else
+            settings().Rendering.QualityLevel = 7
+            game:GetService("Lighting").GlobalShadows = true
+            game:GetService("Lighting").Technology = Enum.Technology.Future
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                    v.Enabled = true
+                end
+            end
+        end
+    end},
+    {name = "DisableEffects", callback = function(enabled)
+        if enabled then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") then
+                    v.Enabled = false
+                end
+            end
+        else
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") then
+                    v.Enabled = true
+                end
+            end
+        end
+    end},
+    {name = "ReduceTextures", callback = RemoveTextures},
+    {name = "DisableLighting", callback = function(enabled)
+        if enabled then
+            game:GetService("Lighting").GlobalShadows = false
+            game:GetService("Lighting").ShadowSoftness = 0
+            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
+        else
+            game:GetService("Lighting").GlobalShadows = true
+            game:GetService("Lighting").ShadowSoftness = 0.5
+            game:GetService("Lighting").Technology = Enum.Technology.Future
+        end
+    end}
+}
+
 local MiscFeatures = {
     {name = "ChatSpam", callback = ChatSpam},
     {name = "AutoFarm", callback = AutoFarm},
     {name = "ServerHop", callback = ServerHop}
 }
 
--- Configuración de idioma
 local SettingsFeatures = {
     {name = "Language", callback = function(enabled)
         if enabled then
@@ -811,6 +917,10 @@ for _, feature in ipairs(WorldFeatures) do
     CreateToggle(feature.name, Sections.World, feature.callback)
 end
 
+for _, feature in ipairs(OptimizationFeatures) do
+    CreateToggle(feature.name, Sections.Optimization, feature.callback)
+end
+
 for _, feature in ipairs(MiscFeatures) do
     CreateToggle(feature.name, Sections.Misc, feature.callback)
 end
@@ -819,7 +929,7 @@ for _, feature in ipairs(SettingsFeatures) do
     CreateToggle(feature.name, Sections.Settings, feature.callback)
 end
 
--- Manejar la visibilidad de las secciones
+-- Manejar la visibilidad de las secciones y mantener el color morado
 local function ShowSection(sectionName)
     for name, section in pairs(Sections) do
         section.Visible = (name == sectionName)
@@ -828,6 +938,7 @@ local function ShowSection(sectionName)
             button.BackgroundColor3 = (name == sectionName) and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(45, 45, 45)
         end
     end
+    ActiveCategory = sectionName
 end
 
 for _, category in ipairs(Categories) do
