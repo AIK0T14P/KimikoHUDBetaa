@@ -179,10 +179,22 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
+-- Título "Kimiko HUD Beta"
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Kimiko HUD Beta"
+Title.TextColor3 = Color3.fromRGB(147, 112, 219)
+Title.TextSize = 24
+Title.Parent = MainFrame
+
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 150, 1, 0)
+Sidebar.Size = UDim2.new(0, 150, 1, -50)
+Sidebar.Position = UDim2.new(0, 0, 0, 50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.1 -- Ligera transparencia
 Sidebar.BorderSizePixel = 0
@@ -191,8 +203,8 @@ Sidebar.Parent = MainFrame
 -- Contenedor principal
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -150, 1, 0)
-ContentFrame.Position = UDim2.new(0, 150, 0, 0)
+ContentFrame.Size = UDim2.new(1, -150, 1, -50)
+ContentFrame.Position = UDim2.new(0, 150, 0, 50)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ContentFrame.BackgroundTransparency = 0.1 -- Ligera transparencia
 ContentFrame.BorderSizePixel = 0
@@ -212,7 +224,7 @@ local function CreateCategory(name, icon, position)
     
     local IconImage = Instance.new("ImageLabel")
     IconImage.Size = UDim2.new(0, 20, 0, 20)
-    IconImage.Position = UDim2.new(0, 10, 0.5, -10)
+    IconImage.Position = UDim2.new(0, 5, 0.5, -10)
     IconImage.BackgroundTransparency = 1
     IconImage.Image = icon
     IconImage.Parent = CategoryButton
@@ -223,7 +235,7 @@ local function CreateCategory(name, icon, position)
     CategoryButton.AutoButtonColor = false
     
     local TextPadding = Instance.new("UIPadding")
-    TextPadding.PaddingLeft = UDim.new(0, 40)
+    TextPadding.PaddingLeft = UDim.new(0, 30)
     TextPadding.Parent = CategoryButton
     
     local Corner = Instance.new("UICorner")
@@ -316,6 +328,87 @@ local function CreateToggle(name, section, callback)
     return Toggle
 end
 
+-- Función para crear sliders
+local function CreateSlider(name, section, callback, min, max, default)
+    local SliderFrame = Instance.new("Frame")
+    SliderFrame.Size = UDim2.new(1, 0, 0, 60)
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    SliderFrame.Parent = section
+    
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = SliderFrame
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -20, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, 5)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.GothamSemibold
+    Label.Text = Texts.features[name] .. ": " .. default
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextSize = 14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = SliderFrame
+    
+    local SliderBar = Instance.new("TextButton")
+    SliderBar.Name = "SliderBar"
+    SliderBar.Size = UDim2.new(1, -20, 0, 20)
+    SliderBar.Position = UDim2.new(0, 10, 0, 30)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    SliderBar.BorderSizePixel = 0
+    SliderBar.AutoButtonColor = false
+    SliderBar.Text = ""
+    SliderBar.Parent = SliderFrame
+    
+    local SliderCorner = Instance.new("UICorner")
+    SliderCorner.CornerRadius = UDim.new(1, 0)
+    SliderCorner.Parent = SliderBar
+    
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    SliderFill.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
+    SliderFill.BorderSizePixel = 0
+    SliderFill.Parent = SliderBar
+    
+    local SliderFillCorner = Instance.new("UICorner")
+    SliderFillCorner.CornerRadius = UDim.new(1, 0)
+    SliderFillCorner.Parent = SliderFill
+    
+    local Value = default
+    local Dragging = false
+    
+    local function UpdateSlider(input)
+        local sizeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+        Value = math.floor(min + ((max - min) * sizeX))
+        SliderFill.Size = UDim2.new(sizeX, 0, 1, 0)
+        Label.Text = Texts.features[name] .. ": " .. Value
+        callback(Value)
+    end
+    
+    SliderBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Dragging = true
+            UpdateSlider(input)
+        end
+    end)
+    
+    SliderBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(input)
+        end
+    end)
+    
+    return function()
+        return Value
+    end
+end
+
 -- Funciones de habilidades mejoradas
 local function ToggleFly(enabled)
     if enabled then
@@ -363,22 +456,13 @@ local function ToggleFly(enabled)
     end
 end
 
-local function ToggleSpeed(enabled)
-    if enabled then
-        Humanoid.WalkSpeed = 50
-    else
-        Humanoid.WalkSpeed = 16
-    end
+local function ToggleSpeed(value)
+    Humanoid.WalkSpeed = value
 end
 
-local function ToggleSuperJump(enabled)
-    if enabled then
-        Humanoid.JumpPower = 100
-        Humanoid.JumpHeight = 7.2
-    else
-        Humanoid.JumpPower = 50
-        Humanoid.JumpHeight = 7.2
-    end
+local function ToggleSuperJump(value)
+    Humanoid.JumpPower = value
+    Humanoid.JumpHeight = 7.2
 end
 
 local function Invisibility(enabled)
@@ -630,8 +714,8 @@ end
 -- Características actualizadas
 local MovementFeatures = {
     {name = "Fly", callback = ToggleFly},
-    {name = "Speed", callback = ToggleSpeed},
-    {name = "SuperJump", callback = ToggleSuperJump},
+    {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
+    {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
     {name = "InfiniteJump", callback = InfiniteJump},
     {name = "NoClip", callback = NoClip}
 }
@@ -702,9 +786,13 @@ local SettingsFeatures = {
     end}
 }
 
--- Crear toggles para cada característica
+-- Crear toggles y sliders para cada característica
 for _, feature in ipairs(MovementFeatures) do
-    CreateToggle(feature.name, Sections.Movement, feature.callback)
+    if feature.slider then
+        CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
+    else
+        CreateToggle(feature.name, Sections.Movement, feature.callback)
+    end
 end
 
 for _, feature in ipairs(CombatFeatures) do
