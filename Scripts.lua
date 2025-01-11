@@ -922,4 +922,3 @@ ShowSection("Home")
 
 -- Mensaje de confirmación
 print("Script de optimización mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
-
