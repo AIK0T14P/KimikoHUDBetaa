@@ -519,10 +519,22 @@ local PingLabel = CreateInfoLabel(Texts.ping .. ": 0 ms", 110)
 local ServerNameLabel = CreateInfoLabel(Texts.serverName .. ": " .. game.Name, 140)
 
 -- Actualizar información del servidor
+local lastUpdateTime = 0
+local frameCount = 0
+local currentFPS = 0
+
 local function UpdateServerInfo()
     PlayersLabel.Text = Texts.players .. ": " .. #Players:GetPlayers()
-    FPSLabel.Text = Texts.fps .. ": " .. math.floor(1 / RunService.RenderStepped:Wait())
     PingLabel.Text = Texts.ping .. ": " .. math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. " ms"
+    
+    frameCount = frameCount + 1
+    local currentTime = tick()
+    if currentTime - lastUpdateTime >= 1 then
+        currentFPS = frameCount
+        frameCount = 0
+        lastUpdateTime = currentTime
+        FPSLabel.Text = Texts.fps .. ": " .. currentFPS
+    end
 end
 
 RunService.RenderStepped:Connect(UpdateServerInfo)
@@ -574,3 +586,4 @@ ShowSection("Home")
 
 -- Mensaje de confirmación
 print("Script de optimización cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+
