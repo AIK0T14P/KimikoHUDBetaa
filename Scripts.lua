@@ -17,87 +17,49 @@ local Camera = workspace.CurrentCamera
 local Languages = {
     ["English"] = {
         categories = {
-            Movement = "Movement",
-            Combat = "Combat",
-            Visuals = "Visuals",
-            Player = "Player",
-            World = "World",
-            Optimization = "Optimization",
-            Misc = "Misc",
+            Home = "Home",
+            ShortTermOptimization = "Short-Term Optimization",
+            LongTermOptimization = "Long-Term Optimization",
             Settings = "Settings"
         },
         features = {
-            Fly = "Fly",
-            Speed = "Speed",
-            SuperJump = "Super Jump",
-            InfiniteJump = "Infinite Jump",
-            NoClip = "No Clip",
-            GodMode = "God Mode",
-            KillAura = "Kill Aura",
-            AutoParry = "Auto Parry",
-            Reach = "Reach",
-            ESP = "ESP",
-            Chams = "Chams",
-            Tracers = "Tracers",
-            Fullbright = "Fullbright",
-            Invisibility = "Invisibility",
-            AntiAFK = "Anti AFK",
-            AutoReset = "Auto Reset",
-            RemoveFog = "Remove Fog",
-            DayNight = "Day/Night",
-            RemoveTextures = "Remove Textures",
-            ChatSpam = "Chat Spam",
-            AutoFarm = "Auto Farm",
-            ServerHop = "Server Hop",
-            Language = "Language",
             LowGraphics = "Low Graphics",
             DisableEffects = "Disable Effects",
             ReduceTextures = "Reduce Textures",
-            DisableLighting = "Disable Lighting"
+            DisableLighting = "Disable Lighting",
+            OptimizeMemory = "Optimize Memory",
+            StreamingEnabled = "Streaming Enabled",
+            Language = "Language"
         },
-        loading = "Loading..."
+        loading = "Loading...",
+        serverInfo = "Server Info",
+        players = "Players",
+        fps = "FPS",
+        ping = "Ping",
+        serverName = "Server Name"
     },
     ["Español"] = {
         categories = {
-            Movement = "Movimiento",
-            Combat = "Combate",
-            Visuals = "Visuales",
-            Player = "Jugador",
-            World = "Mundo",
-            Optimization = "Optimización",
-            Misc = "Misc",
+            Home = "Inicio",
+            ShortTermOptimization = "Optimización a Corto Plazo",
+            LongTermOptimization = "Optimización a Largo Plazo",
             Settings = "Ajustes"
         },
         features = {
-            Fly = "Volar",
-            Speed = "Velocidad",
-            SuperJump = "Super Salto",
-            InfiniteJump = "Salto Infinito",
-            NoClip = "No Clip",
-            GodMode = "Modo Dios",
-            KillAura = "Aura Asesina",
-            AutoParry = "Auto Parry",
-            Reach = "Alcance",
-            ESP = "ESP",
-            Chams = "Chams",
-            Tracers = "Trazadores",
-            Fullbright = "Brillo Total",
-            Invisibility = "Invisibilidad",
-            AntiAFK = "Anti AFK",
-            AutoReset = "Auto Reset",
-            RemoveFog = "Quitar Niebla",
-            DayNight = "Día/Noche",
-            RemoveTextures = "Quitar Texturas",
-            ChatSpam = "Spam Chat",
-            AutoFarm = "Auto Farm",
-            ServerHop = "Cambiar Servidor",
-            Language = "Idioma",
             LowGraphics = "Gráficos Bajos",
             DisableEffects = "Desactivar Efectos",
             ReduceTextures = "Reducir Texturas",
-            DisableLighting = "Desactivar Iluminación"
+            DisableLighting = "Desactivar Iluminación",
+            OptimizeMemory = "Optimizar Memoria",
+            StreamingEnabled = "Streaming Activado",
+            Language = "Idioma"
         },
-        loading = "Cargando..."
+        loading = "Cargando...",
+        serverInfo = "Información del Servidor",
+        players = "Jugadores",
+        fps = "FPS",
+        ping = "Ping",
+        serverName = "Nombre del Servidor"
     }
 }
 
@@ -146,7 +108,7 @@ loadingTween.Completed:Wait()
 
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "EnhancedGui"
+ScreenGui.Name = "OptimizationGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.CoreGui
@@ -203,13 +165,13 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
--- Título "Kimiko HUD Beta"
+-- Título "Kimiko Optimization"
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 10)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "Kimiko HUD Beta"
+Title.Text = "Kimiko Optimization"
 Title.TextColor3 = Color3.fromRGB(147, 112, 219)
 Title.TextSize = 24
 Title.Parent = MainFrame
@@ -352,344 +314,46 @@ local function CreateToggle(name, section, callback)
     return Toggle
 end
 
--- Función para crear sliders
-local function CreateSlider(name, section, callback, min, max, default)
-    local SliderFrame = Instance.new("Frame")
-    SliderFrame.Size = UDim2.new(1, 0, 0, 60)
-    SliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    SliderFrame.Parent = section
-    
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = SliderFrame
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -20, 0, 20)
-    Label.Position = UDim2.new(0, 10, 0, 5)
-    Label.BackgroundTransparency = 1
-    Label.Font = Enum.Font.GothamSemibold
-    Label.Text = Texts.features[name] .. ": " .. default
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 14
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = SliderFrame
-    
-    local SliderBar = Instance.new("TextButton")
-    SliderBar.Name = "SliderBar"
-    SliderBar.Size = UDim2.new(1, -20, 0, 20)
-    SliderBar.Position = UDim2.new(0, 10, 0, 30)
-    SliderBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    SliderBar.BorderSizePixel = 0
-    SliderBar.AutoButtonColor = false
-    SliderBar.Text = ""
-    SliderBar.Parent = SliderFrame
-    
-    local SliderCorner = Instance.new("UICorner")
-    SliderCorner.CornerRadius = UDim.new(1, 0)
-    SliderCorner.Parent = SliderBar
-    
-    local SliderFill = Instance.new("Frame")
-    SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-    SliderFill.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
-    SliderFill.BorderSizePixel = 0
-    SliderFill.Parent = SliderBar
-    
-    local SliderFillCorner = Instance.new("UICorner")
-    SliderFillCorner.CornerRadius = UDim.new(1, 0)
-    SliderFillCorner.Parent = SliderFill
-    
-    local Value = default
-    local Dragging = false
-    
-    local function UpdateSlider(input)
-        local sizeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-        Value = math.floor(min + ((max - min) * sizeX))
-        SliderFill.Size = UDim2.new(sizeX, 0, 1, 0)
-        Label.Text = Texts.features[name] .. ": " .. Value
-        callback(Value)
-    end
-    
-    SliderBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            Dragging = true
-            UpdateSlider(input)
-        end
-    end)
-    
-    SliderBar.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            Dragging = false
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateSlider(input)
-        end
-    end)
-    
-    return function()
-        return Value
-    end
-end
-
--- Funciones de habilidades mejoradas
-local function ToggleFly(enabled)
+-- Funciones de optimización
+local function LowGraphics(enabled)
     if enabled then
-        local BG = Instance.new("BodyGyro", HumanoidRootPart)
-        BG.P = 9e4
-        BG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-        BG.CFrame = HumanoidRootPart.CFrame
-        
-        local BV = Instance.new("BodyVelocity", HumanoidRootPart)
-        BV.Velocity = Vector3.new(0, 0.1, 0)
-        BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        
-        RunService:BindToRenderStep("Fly", 100, function()
-            if not enabled then return end
-            
-            BG.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + Camera.CFrame.LookVector)
-            
-            local moveDirection = Vector3.new(
-                UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or (UserInputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0),
-                (UserInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and 1 or 0),
-                UserInputService:IsKeyDown(Enum.KeyCode.S) and 1 or (UserInputService:IsKeyDown(Enum.KeyCode.W) and -1 or 0)
-            )
-            
-            local cameraCFrame = Camera.CFrame
-            local lookVector = cameraCFrame.LookVector
-            local rightVector = cameraCFrame.RightVector
-            
-            local velocity = (rightVector * moveDirection.X + cameraCFrame.UpVector * moveDirection.Y + lookVector * moveDirection.Z) * 50
-            
-            if velocity.Magnitude > 0 then
-                BV.Velocity = velocity
-            else
-                BV.Velocity = Vector3.new(0, 0.1, 0)
+        settings().Rendering.QualityLevel = 1
+        game:GetService("Lighting").GlobalShadows = false
+        game:GetService("Lighting").Technology = Enum.Technology.Compatibility
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                v.Enabled = false
             end
-        end)
+        end
     else
-        RunService:UnbindFromRenderStep("Fly")
-        for _, v in pairs(HumanoidRootPart:GetChildren()) do
-            if v:IsA("BodyGyro") or v:IsA("BodyVelocity") then
-                v:Destroy()
+        settings().Rendering.QualityLevel = 7
+        game:GetService("Lighting").GlobalShadows = true
+        game:GetService("Lighting").Technology = Enum.Technology.Future
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                v.Enabled = true
             end
         end
     end
 end
 
-local function ToggleSpeed(value)
-    Humanoid.WalkSpeed = value
-end
-
-local function ToggleSuperJump(value)
-    Humanoid.JumpPower = value
-    Humanoid.JumpHeight = 7.2
-end
-
-local function Invisibility(enabled)
+local function DisableEffects(enabled)
     if enabled then
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("MeshPart") or part:IsA("Part") then
-                part.Transparency = 1
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") then
+                v.Enabled = false
             end
         end
-        
-        Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
     else
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("MeshPart") or part:IsA("Part") then
-                part.Transparency = 0
-            end
-        end
-        
-        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-        
-        local clone = workspace:FindFirstChild(Character.Name)
-        if clone then clone:Destroy() end
-    end
-end
-
-local function GodMode(enabled)
-    if enabled then
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        Character.Parent = game.ReplicatedStorage
-        
-        local function onDied()
-            Character.Parent = workspace
-            local clone = workspace:FindFirstChild(Character.Name)
-            if clone then clone:Destroy() end
-        end
-        
-        clone.Humanoid.Died:Connect(onDied)
-    end
-end
-
-local function InfiniteJump(enabled)
-    local connection
-    if enabled then
-        connection = UserInputService.JumpRequest:Connect(function()
-            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function NoClip(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Stepped:Connect(function()
-            for _, part in pairs(Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") then
+                v.Enabled = true
             end
         end
     end
 end
 
-local function ESP(enabled)
-    if enabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local highlight = Instance.new("Highlight")
-                highlight.Name = "ESPHighlight"
-                highlight.Parent = player.Character
-                highlight.FillColor = Color3.fromRGB(147, 112, 219)
-                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-            end
-        end
-        
-        Players.PlayerAdded:Connect(function(player)
-            player.CharacterAdded:Connect(function(character)
-                if enabled then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "ESPHighlight"
-                    highlight.Parent = character
-                    highlight.FillColor = Color3.fromRGB(147, 112, 219)
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                end
-            end)
-        end)
-    else
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local highlight = player.Character:FindFirstChild("ESPHighlight")
-                if highlight then highlight:Destroy() end
-            end
-        end
-    end
-end
-
-local function Fullbright(enabled)
-    if enabled then
-        game.Lighting.Brightness = 2
-        game.Lighting.ClockTime = 14
-        game.Lighting.FogEnd = 100000
-        game.Lighting.GlobalShadows = false
-        game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-    else
-        game.Lighting.Brightness = 1
-        game.Lighting.ClockTime = 12
-        game.Lighting.FogEnd = 10000
-        game.Lighting.GlobalShadows = true
-        game.Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
-    end
-end
-
-local function Tracers(enabled)
-    local tracers = {}
-    
-    local function createTracer(player)
-        if player == LocalPlayer then return end
-        
-        local tracer = Drawing.new("Line")
-        tracer.Visible = false
-        tracer.Color = Color3.new(1, 1, 1)
-        tracer.Thickness = 1
-        tracer.Transparency = 1
-        tracers[player] = tracer
-        
-        local connection
-        connection = RunService.RenderStepped:Connect(function()
-            if not enabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-                tracer.Visible = false
-                return
-            end
-            
-            local vector, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
-            if onScreen then
-                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                tracer.To = Vector2.new(vector.X, vector.Y)
-                tracer.Visible = true
-            else
-                tracer.Visible = false
-            end
-        end)
-    end
-    
-    if enabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createTracer(player)
-        end
-        
-        Players.PlayerAdded:Connect(createTracer)
-        Players.PlayerRemoving:Connect(function(player)
-            if tracers[player] then
-                tracers[player]:Remove()
-                tracers[player] = nil
-            end
-        end)
-    else
-        for _, tracer in pairs(tracers) do
-            tracer:Remove()
-        end
-        tracers = {}
-    end
-end
-
-local function RemoveFog(enabled)
-    if enabled then
-        game.Lighting.FogStart = 100000
-        game.Lighting.FogEnd = 100000
-    else
-        game.Lighting.FogStart = 0
-        game.Lighting.FogEnd = 100000
-    end
-end
-
-local function DayNight(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Heartbeat:Connect(function()
-            local currentTime = tick() % 24
-            game.Lighting.ClockTime = currentTime
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-        game.Lighting.ClockTime = 12
-    end
-end
-
-local function RemoveTextures(enabled)
+local function ReduceTextures(enabled)
     local originalMaterials = {}
     if enabled then
         for _, v in pairs(workspace:GetDescendants()) do
@@ -708,51 +372,41 @@ local function RemoveTextures(enabled)
     end
 end
 
-local function ChatSpam(enabled)
-    local connection
+local function DisableLighting(enabled)
     if enabled then
-        connection = RunService.Heartbeat:Connect(function()
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Spam message", "All")
-            wait(1)
-        end)
+        game:GetService("Lighting").GlobalShadows = false
+        game:GetService("Lighting").ShadowSoftness = 0
+        game:GetService("Lighting").Technology = Enum.Technology.Compatibility
     else
-        if connection then
-            connection:Disconnect()
-        end
+        game:GetService("Lighting").GlobalShadows = true
+        game:GetService("Lighting").ShadowSoftness = 0.5
+        game:GetService("Lighting").Technology = Enum.Technology.Future
     end
 end
 
-local function AutoFarm(enabled)
+local function OptimizeMemory(enabled)
     if enabled then
-        print("Auto Farm enabled. Implement game-specific farming logic here.")
+        game:GetService("ContentProvider"):SetBaseUrl("http://www.roblox.com/asset/")
+        game:GetService("ContentProvider"):SetAssetUrl("http://www.roblox.com/asset/")
+        game:GetService("ContentProvider"):SetAssetVersionUrl("http://www.roblox.com/asset/")
+        settings().Rendering.EagerBulkExecution = true
     else
-        print("Auto Farm disabled.")
+        game:GetService("ContentProvider"):SetBaseUrl("https://www.roblox.com/asset/")
+        game:GetService("ContentProvider"):SetAssetUrl("https://assetdelivery.roblox.com/v1/asset/")
+        game:GetService("ContentProvider"):SetAssetVersionUrl("https://assetdelivery.roblox.com/v1/assetversion/")
+        settings().Rendering.EagerBulkExecution = false
     end
 end
 
-local function ServerHop()
-    local HttpService = game:GetService("HttpService")
-    local TeleportService = game:GetService("TeleportService")
-    local PlaceId = game.PlaceId
-    
-    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-    for _, server in pairs(servers.data) do
-        if server.playing < server.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(PlaceId, server.id)
-            break
-        end
-    end
+local function StreamingEnabled(enabled)
+    settings().Rendering.StreamingEnabled = enabled
 end
 
 -- Categorías actualizadas
 local Categories = {
-    {name = "Movement", icon = "rbxassetid://3926307971"},
-    {name = "Combat", icon = "rbxassetid://3926307971"},
-    {name = "Visuals", icon = "rbxassetid://3926307971"},
-    {name = "Player", icon = "rbxassetid://3926307971"},
-    {name = "World", icon = "rbxassetid://3926307971"},
-    {name = "Optimization", icon = "rbxassetid://3926307971"},
-    {name = "Misc", icon = "rbxassetid://3926307971"},
+    {name = "Home", icon = "rbxassetid://3926305904"},
+    {name = "ShortTermOptimization", icon = "rbxassetid://3926307971"},
+    {name = "LongTermOptimization", icon = "rbxassetid://3926307971"},
     {name = "Settings", icon = "rbxassetid://3926307971"}
 }
 
@@ -766,95 +420,16 @@ for i, category in ipairs(Categories) do
 end
 
 -- Características actualizadas
-local MovementFeatures = {
-    {name = "Fly", callback = ToggleFly},
-    {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
-    {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
-    {name = "InfiniteJump", callback = InfiniteJump},
-    {name = "NoClip", callback = NoClip}
+local ShortTermOptimizationFeatures = {
+    {name = "LowGraphics", callback = LowGraphics},
+    {name = "DisableEffects", callback = DisableEffects},
+    {name = "ReduceTextures", callback = ReduceTextures},
+    {name = "DisableLighting", callback = DisableLighting}
 }
 
-local CombatFeatures = {
-    {name = "GodMode", callback = GodMode},
-    {name = "KillAura", callback = function() end},
-    {name = "AutoParry", callback = function() end},
-    {name = "Reach", callback = function() end}
-}
-
-local VisualFeatures = {
-    {name = "ESP", callback = ESP},
-    {name = "Chams", callback = function() end},
-    {name = "Tracers", callback = Tracers},
-    {name = "Fullbright", callback = Fullbright}
-}
-
-local PlayerFeatures = {
-    {name = "Invisibility", callback = Invisibility},
-    {name = "AntiAFK", callback = function() end},
-    {name = "AutoReset", callback = function() end}
-}
-
-local WorldFeatures = {
-    {name = "RemoveFog", callback = RemoveFog},
-    {name = "DayNight", callback = DayNight},
-    {name = "RemoveTextures", callback = RemoveTextures}
-}
-
-local OptimizationFeatures = {
-    {name = "LowGraphics", callback = function(enabled)
-        if enabled then
-            settings().Rendering.QualityLevel = 1
-            game:GetService("Lighting").GlobalShadows = false
-            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                    v.Enabled = false
-                end
-            end
-        else
-            settings().Rendering.QualityLevel = 7
-            game:GetService("Lighting").GlobalShadows = true
-            game:GetService("Lighting").Technology = Enum.Technology.Future
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                    v.Enabled = true
-                end
-            end
-        end
-    end},
-    {name = "DisableEffects", callback = function(enabled)
-        if enabled then
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") then
-                    v.Enabled = false
-                end
-            end
-        else
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") then
-                    v.Enabled = true
-                end
-            end
-        end
-    end},
-    {name = "ReduceTextures", callback = RemoveTextures},
-    {name = "DisableLighting", callback = function(enabled)
-        if enabled then
-            game:GetService("Lighting").GlobalShadows = false
-            game:GetService("Lighting").ShadowSoftness = 0
-            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
-        else
-            game:GetService("Lighting").GlobalShadows = true
-            game:GetService("Lighting").ShadowSoftness = 0.5
-            game:GetService("Lighting").Technology = Enum.Technology.Future
-        end
-    end}
-}
-
-local MiscFeatures = {
-    {name = "ChatSpam", callback = ChatSpam},
-    {name = "AutoFarm", callback = AutoFarm},
-    {name = "ServerHop", callback = ServerHop}
+local LongTermOptimizationFeatures = {
+    {name = "OptimizeMemory", callback = OptimizeMemory},
+    {name = "StreamingEnabled", callback = StreamingEnabled}
 }
 
 local SettingsFeatures = {
@@ -890,42 +465,67 @@ local SettingsFeatures = {
     end}
 }
 
--- Crear toggles y sliders para cada característica
-for _, feature in ipairs(MovementFeatures) do
-    if feature.slider then
-        CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
-    else
-        CreateToggle(feature.name, Sections.Movement, feature.callback)
-    end
+-- Crear toggles para cada característica
+for _, feature in ipairs(ShortTermOptimizationFeatures) do
+    CreateToggle(feature.name, Sections.ShortTermOptimization, feature.callback)
 end
 
-for _, feature in ipairs(CombatFeatures) do
-    CreateToggle(feature.name, Sections.Combat, feature.callback)
-end
-
-for _, feature in ipairs(VisualFeatures) do
-    CreateToggle(feature.name, Sections.Visuals, feature.callback)
-end
-
-for _, feature in ipairs(PlayerFeatures) do
-    CreateToggle(feature.name, Sections.Player, feature.callback)
-end
-
-for _, feature in ipairs(WorldFeatures) do
-    CreateToggle(feature.name, Sections.World, feature.callback)
-end
-
-for _, feature in ipairs(OptimizationFeatures) do
-    CreateToggle(feature.name, Sections.Optimization, feature.callback)
-end
-
-for _, feature in ipairs(MiscFeatures) do
-    CreateToggle(feature.name, Sections.Misc, feature.callback)
+for _, feature in ipairs(LongTermOptimizationFeatures) do
+    CreateToggle(feature.name, Sections.LongTermOptimization, feature.callback)
 end
 
 for _, feature in ipairs(SettingsFeatures) do
     CreateToggle(feature.name, Sections.Settings, feature.callback)
 end
+
+-- Crear sección Home
+local HomeSection = Sections.Home
+local ServerInfoFrame = Instance.new("Frame")
+ServerInfoFrame.Size = UDim2.new(1, 0, 0, 200)
+ServerInfoFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ServerInfoFrame.Parent = HomeSection
+
+local ServerInfoCorner = Instance.new("UICorner")
+ServerInfoCorner.CornerRadius = UDim.new(0, 6)
+ServerInfoCorner.Parent = ServerInfoFrame
+
+local ServerInfoTitle = Instance.new("TextLabel")
+ServerInfoTitle.Size = UDim2.new(1, 0, 0, 30)
+ServerInfoTitle.Position = UDim2.new(0, 0, 0, 10)
+ServerInfoTitle.BackgroundTransparency = 1
+ServerInfoTitle.Font = Enum.Font.GothamBold
+ServerInfoTitle.Text = Texts.serverInfo
+ServerInfoTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ServerInfoTitle.TextSize = 18
+ServerInfoTitle.Parent = ServerInfoFrame
+
+local function CreateInfoLabel(text, yPos)
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -20, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, yPos)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.Gotham
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Label.TextSize = 14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = ServerInfoFrame
+    return Label
+end
+
+local PlayersLabel = CreateInfoLabel(Texts.players .. ": 0", 50)
+local FPSLabel = CreateInfoLabel(Texts.fps .. ": 0", 80)
+local PingLabel = CreateInfoLabel(Texts.ping .. ": 0 ms", 110)
+local ServerNameLabel = CreateInfoLabel(Texts.serverName .. ": " .. game.Name, 140)
+
+-- Actualizar información del servidor
+local function UpdateServerInfo()
+    PlayersLabel.Text = Texts.players .. ": " .. #Players:GetPlayers()
+    FPSLabel.Text = Texts.fps .. ": " .. math.floor(1 / RunService.RenderStepped:Wait())
+    PingLabel.Text = Texts.ping .. ": " .. math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. " ms"
+end
+
+RunService.RenderStepped:Connect(UpdateServerInfo)
 
 -- Manejar la visibilidad de las secciones y mantener el color morado
 local function ShowSection(sectionName)
@@ -970,7 +570,7 @@ end)
 LoadingGui:Destroy()
 
 -- Mostrar la primera sección por defecto
-ShowSection("Movement")
+ShowSection("Home")
 
 -- Mensaje de confirmación
-print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+print("Script de optimización cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
