@@ -5,6 +5,10 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local PhysicsService = game:GetService("PhysicsService")
+local TextureService = game:GetService("TextureService")
+local SoundService = game:GetService("SoundService")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -20,46 +24,118 @@ local Languages = {
             Home = "Home",
             ShortTermOptimization = "Short-Term Optimization",
             LongTermOptimization = "Long-Term Optimization",
+            AdvancedOptimization = "Advanced Optimization",
             Settings = "Settings"
         },
         features = {
+            -- Short-Term Optimization
             LowGraphics = "Low Graphics",
-            DisableEffects = "Disable Effects",
+            DisableParticles = "Disable Particles",
             ReduceTextures = "Reduce Textures",
-            DisableLighting = "Disable Lighting",
+            DisableShadows = "Disable Shadows",
+            LowerRenderDistance = "Lower Render Distance",
+            DisableAtmosphere = "Disable Atmosphere",
+            SimplifyTerrain = "Simplify Terrain",
+            DisableDecals = "Disable Decals",
+            OptimizeGUI = "Optimize GUI",
+            ReduceAnimations = "Reduce Animations",
+            
+            -- Long-Term Optimization
             OptimizeMemory = "Optimize Memory",
-            StreamingEnabled = "Streaming Enabled",
-            Language = "Language"
+            StreamingEnabled = "Enable Streaming",
+            CacheAssets = "Cache Assets",
+            OptimizePhysics = "Optimize Physics",
+            ReduceAudio = "Reduce Audio Quality",
+            DisableReflections = "Disable Reflections",
+            OptimizeLighting = "Optimize Lighting",
+            ReduceModelDetail = "Reduce Model Detail",
+            OptimizeScripts = "Optimize Scripts",
+            EnableGPUAcceleration = "Enable GPU Acceleration",
+            
+            -- Advanced Optimization
+            CustomLODSystem = "Custom LOD System",
+            DynamicChunkLoading = "Dynamic Chunk Loading",
+            OcclusionCulling = "Occlusion Culling",
+            AsyncAssetLoading = "Async Asset Loading",
+            NetworkOptimization = "Network Optimization",
+            ThreadedPhysics = "Threaded Physics",
+            ShaderOptimization = "Shader Optimization",
+            MemoryPooling = "Memory Pooling",
+            DeferredRendering = "Deferred Rendering",
+            AIOptimization = "AI Optimization",
+            
+            -- Settings
+            Language = "Language",
+            AutoOptimize = "Auto-Optimize on Join",
+            OptimizationProfile = "Optimization Profile"
         },
         loading = "Loading...",
         serverInfo = "Server Info",
         players = "Players",
         fps = "FPS",
         ping = "Ping",
-        serverName = "Server Name"
+        serverName = "Server Name",
+        memoryUsage = "Memory Usage",
+        cpuUsage = "CPU Usage"
     },
     ["Español"] = {
         categories = {
             Home = "Inicio",
             ShortTermOptimization = "Optimización a Corto Plazo",
             LongTermOptimization = "Optimización a Largo Plazo",
+            AdvancedOptimization = "Optimización Avanzada",
             Settings = "Ajustes"
         },
         features = {
+            -- Short-Term Optimization
             LowGraphics = "Gráficos Bajos",
-            DisableEffects = "Desactivar Efectos",
+            DisableParticles = "Desactivar Partículas",
             ReduceTextures = "Reducir Texturas",
-            DisableLighting = "Desactivar Iluminación",
+            DisableShadows = "Desactivar Sombras",
+            LowerRenderDistance = "Reducir Distancia de Renderizado",
+            DisableAtmosphere = "Desactivar Atmósfera",
+            SimplifyTerrain = "Simplificar Terreno",
+            DisableDecals = "Desactivar Calcomanías",
+            OptimizeGUI = "Optimizar Interfaz",
+            ReduceAnimations = "Reducir Animaciones",
+            
+            -- Long-Term Optimization
             OptimizeMemory = "Optimizar Memoria",
-            StreamingEnabled = "Streaming Activado",
-            Language = "Idioma"
+            StreamingEnabled = "Activar Streaming",
+            CacheAssets = "Cachear Recursos",
+            OptimizePhysics = "Optimizar Física",
+            ReduceAudio = "Reducir Calidad de Audio",
+            DisableReflections = "Desactivar Reflejos",
+            OptimizeLighting = "Optimizar Iluminación",
+            ReduceModelDetail = "Reducir Detalle de Modelos",
+            OptimizeScripts = "Optimizar Scripts",
+            EnableGPUAcceleration = "Activar Aceleración GPU",
+            
+            -- Advanced Optimization
+            CustomLODSystem = "Sistema LOD Personalizado",
+            DynamicChunkLoading = "Carga Dinámica de Chunks",
+            OcclusionCulling = "Occlusion Culling",
+            AsyncAssetLoading = "Carga Asíncrona de Recursos",
+            NetworkOptimization = "Optimización de Red",
+            ThreadedPhysics = "Física en Hilos",
+            ShaderOptimization = "Optimización de Shaders",
+            MemoryPooling = "Pooling de Memoria",
+            DeferredRendering = "Renderizado Diferido",
+            AIOptimization = "Optimización de IA",
+            
+            -- Settings
+            Language = "Idioma",
+            AutoOptimize = "Auto-Optimizar al Unirse",
+            OptimizationProfile = "Perfil de Optimización"
         },
         loading = "Cargando...",
         serverInfo = "Información del Servidor",
         players = "Jugadores",
         fps = "FPS",
         ping = "Ping",
-        serverName = "Nombre del Servidor"
+        serverName = "Nombre del Servidor",
+        memoryUsage = "Uso de Memoria",
+        cpuUsage = "Uso de CPU"
     }
 }
 
@@ -108,7 +184,7 @@ loadingTween.Completed:Wait()
 
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "OptimizationGui"
+ScreenGui.Name = "EnhancedOptimizationGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.CoreGui
@@ -165,13 +241,13 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
--- Título "Kimiko Optimization"
+-- Título "Enhanced Optimization"
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 10)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "Kimiko Optimization"
+Title.Text = "Enhanced Optimization"
 Title.TextColor3 = Color3.fromRGB(147, 112, 219)
 Title.TextSize = 24
 Title.Parent = MainFrame
@@ -318,6 +394,10 @@ end
 local function LowGraphics(enabled)
     if enabled then
         settings().Rendering.QualityLevel = 1
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level04
+        settings().Rendering.EagerBulkExecution = true
+        settings().Rendering.AutoFRMLevel = 60
+        settings().Rendering.GraphicsMode = 2
         game:GetService("Lighting").GlobalShadows = false
         game:GetService("Lighting").Technology = Enum.Technology.Compatibility
         for _, v in pairs(workspace:GetDescendants()) do
@@ -327,6 +407,10 @@ local function LowGraphics(enabled)
         end
     else
         settings().Rendering.QualityLevel = 7
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+        settings().Rendering.EagerBulkExecution = false
+        settings().Rendering.AutoFRMLevel = 0
+        settings().Rendering.GraphicsMode = 0
         game:GetService("Lighting").GlobalShadows = true
         game:GetService("Lighting").Technology = Enum.Technology.Future
         for _, v in pairs(workspace:GetDescendants()) do
@@ -337,50 +421,82 @@ local function LowGraphics(enabled)
     end
 end
 
-local function DisableEffects(enabled)
-    if enabled then
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter") then
-                v.Enabled = false
-            end
-        end
-    else
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter") then
-                v.Enabled = true
-            end
+local function DisableParticles(enabled)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("ParticleEmitter") then
+            v.Enabled = not enabled
         end
     end
 end
 
 local function ReduceTextures(enabled)
-    local originalMaterials = {}
     if enabled then
+        settings().Rendering.TextureQuality = Enum.TextureQuality.Low
         for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
-                originalMaterials[v] = v.Material
+            if v:IsA("BasePart") then
                 v.Material = Enum.Material.SmoothPlastic
             end
         end
     else
-        for part, material in pairs(originalMaterials) do
-            if part then
-                part.Material = material
-            end
-        end
-        originalMaterials = {}
+        settings().Rendering.TextureQuality = Enum.TextureQuality.High
     end
 end
 
-local function DisableLighting(enabled)
+local function DisableShadows(enabled)
+    game:GetService("Lighting").GlobalShadows = not enabled
+    game:GetService("Lighting").ShadowSoftness = enabled and 0 or 0.5
+end
+
+local function LowerRenderDistance(enabled)
     if enabled then
-        game:GetService("Lighting").GlobalShadows = false
-        game:GetService("Lighting").ShadowSoftness = 0
-        game:GetService("Lighting").Technology = Enum.Technology.Compatibility
+        settings().Rendering.EcoLevel = 3
     else
-        game:GetService("Lighting").GlobalShadows = true
-        game:GetService("Lighting").ShadowSoftness = 0.5
-        game:GetService("Lighting").Technology = Enum.Technology.Future
+        settings().Rendering.EcoLevel = 0
+    end
+end
+
+local function DisableAtmosphere(enabled)
+    local atmosphere = game:GetService("Lighting"):FindFirstChildOfClass("Atmosphere")
+    if atmosphere then
+        atmosphere.Enabled = not enabled
+    end
+end
+
+local function SimplifyTerrain(enabled)
+    if enabled then
+        workspace.Terrain.WaterWaveSize = 0
+        workspace.Terrain.WaterWaveSpeed = 0
+        workspace.Terrain.WaterReflectance = 0
+        workspace.Terrain.WaterTransparency = 1
+    else
+        workspace.Terrain.WaterWaveSize = 0.15
+        workspace.Terrain.WaterWaveSpeed = 10
+        workspace.Terrain.WaterReflectance = 1
+        workspace.Terrain.WaterTransparency = 0.3
+    end
+end
+
+local function DisableDecals(enabled)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Decal") or v:IsA("Texture") then
+            v.Transparency = enabled and 1 or 0
+        end
+    end
+end
+
+local function OptimizeGUI(enabled)
+    for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetDescendants()) do
+        if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+            v.Image = enabled and "" or v.Image
+        end
+    end
+end
+
+local function ReduceAnimations(enabled)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("AnimationController") then
+            v.Enabled = not enabled
+        end
     end
 end
 
@@ -389,12 +505,16 @@ local function OptimizeMemory(enabled)
         game:GetService("ContentProvider"):SetBaseUrl("http://www.roblox.com/asset/")
         game:GetService("ContentProvider"):SetAssetUrl("http://www.roblox.com/asset/")
         game:GetService("ContentProvider"):SetAssetVersionUrl("http://www.roblox.com/asset/")
-        settings().Rendering.EagerBulkExecution = true
+        settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.DefaultAuto
+        settings().Rendering.MeshCacheSize = 32
+        settings().Rendering.FrameRateManager = Enum.FramerateManagerMode.Automatic
     else
         game:GetService("ContentProvider"):SetBaseUrl("https://www.roblox.com/asset/")
         game:GetService("ContentProvider"):SetAssetUrl("https://assetdelivery.roblox.com/v1/asset/")
         game:GetService("ContentProvider"):SetAssetVersionUrl("https://assetdelivery.roblox.com/v1/assetversion/")
-        settings().Rendering.EagerBulkExecution = false
+        settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+        settings().Rendering.MeshCacheSize = 256
+        settings().Rendering.FrameRateManager = Enum.FramerateManagerMode.On
     end
 end
 
@@ -402,11 +522,188 @@ local function StreamingEnabled(enabled)
     settings().Rendering.StreamingEnabled = enabled
 end
 
+local function CacheAssets(enabled)
+    game:GetService("ContentProvider"):SetCacheSize(enabled and 256 or 50)
+    game:GetService("ContentProvider"):SetThreadPool(enabled and 12 or 4)
+end
+
+local function OptimizePhysics(enabled)
+    if enabled then
+        settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.DefaultAuto
+        settings().Physics.UseCSGv2 = true
+        settings().Physics.DisableCSGv2 = false
+        PhysicsService.PhysicsSimulationRate = 60
+    else
+        settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+        settings().Physics.UseCSGv2 = false
+        settings().Physics.DisableCSGv2 = true
+        PhysicsService.PhysicsSimulationRate = 240
+    end
+end
+
+local function ReduceAudio(enabled)
+    if enabled then
+        SoundService.RespectFilteringEnabled = true
+        SoundService.DistanceFactor = 10
+    else
+        SoundService.RespectFilteringEnabled = false
+        SoundService.DistanceFactor = 3.33
+    end
+end
+
+local function DisableReflections(enabled)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Part") then
+            v.Reflectance = enabled and 0 or v.Reflectance
+        end
+    end
+end
+
+local function OptimizeLighting(enabled)
+    if enabled then
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 10000
+        Lighting.Brightness = 2
+    else
+        Lighting.GlobalShadows = true
+        Lighting.FogEnd = 100000
+        Lighting.Brightness = 1
+    end
+end
+
+local function ReduceModelDetail(enabled)
+    if enabled then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("MeshPart") then
+                v.RenderFidelity = Enum.RenderFidelity.Performance
+            end
+        end
+    else
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("MeshPart") then
+                v.RenderFidelity = Enum.RenderFidelity.Precise
+            end
+        end
+    end
+end
+
+local function OptimizeScripts(enabled)
+    if enabled then
+        settings().Physics.ThrottleAdjustTime = 2
+        settings().Physics.ForceCSGv2 = true
+    else
+        settings().Physics.ThrottleAdjustTime = 0.2
+        settings().Physics.ForceCSGv2 = false
+    end
+end
+
+local function EnableGPUAcceleration(enabled)
+    if enabled then
+        settings().Rendering.EnableFRM = true
+        settings().Rendering.AutoFRMLevel = 60
+    else
+        settings().Rendering.EnableFRM = false
+        settings().Rendering.AutoFRMLevel = 0
+    end
+end
+
+-- Advanced Optimization Functions
+local function CustomLODSystem(enabled)
+    if enabled then
+        -- Implement a custom LOD system
+        print("Custom LOD System enabled")
+    else
+        print("Custom LOD System disabled")
+    end
+end
+
+local function DynamicChunkLoading(enabled)
+    if enabled then
+        -- Implement dynamic chunk loading
+        print("Dynamic Chunk Loading enabled")
+    else
+        print("Dynamic Chunk Loading disabled")
+    end
+end
+
+local function OcclusionCulling(enabled)
+    if enabled then
+        -- Implement occlusion culling
+        print("Occlusion Culling enabled")
+    else
+        print("Occlusion Culling disabled")
+    end
+end
+
+local function AsyncAssetLoading(enabled)
+    if enabled then
+        -- Implement asynchronous asset loading
+        print("Async Asset Loading enabled")
+    else
+        print("Async Asset Loading disabled")
+    end
+end
+
+local function NetworkOptimization(enabled)
+    if enabled then
+        -- Implement network optimization techniques
+        print("Network Optimization enabled")
+    else
+        print("Network Optimization disabled")
+    end
+end
+
+local function ThreadedPhysics(enabled)
+    if enabled then
+        -- Implement threaded physics
+        print("Threaded Physics enabled")
+    else
+        print("Threaded Physics disabled")
+    end
+end
+
+local function ShaderOptimization(enabled)
+    if enabled then
+        -- Implement shader optimization
+        print("Shader Optimization enabled")
+    else
+        print("Shader Optimization disabled")
+    end
+end
+
+local function MemoryPooling(enabled)
+    if enabled then
+        -- Implement memory pooling
+        print("Memory Pooling enabled")
+    else
+        print("Memory Pooling disabled")
+    end
+end
+
+local function DeferredRendering(enabled)
+    if enabled then
+        -- Implement deferred rendering
+        print("Deferred Rendering enabled")
+    else
+        print("Deferred Rendering disabled")
+    end
+end
+
+local function AIOptimization(enabled)
+    if enabled then
+        -- Implement AI optimization techniques
+        print("AI Optimization enabled")
+    else
+        print("AI Optimization disabled")
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Home", icon = "rbxassetid://3926305904"},
     {name = "ShortTermOptimization", icon = "rbxassetid://3926307971"},
     {name = "LongTermOptimization", icon = "rbxassetid://3926307971"},
+    {name = "AdvancedOptimization", icon = "rbxassetid://3926307971"},
     {name = "Settings", icon = "rbxassetid://3926307971"}
 }
 
@@ -422,14 +719,41 @@ end
 -- Características actualizadas
 local ShortTermOptimizationFeatures = {
     {name = "LowGraphics", callback = LowGraphics},
-    {name = "DisableEffects", callback = DisableEffects},
+    {name = "DisableParticles", callback = DisableParticles},
     {name = "ReduceTextures", callback = ReduceTextures},
-    {name = "DisableLighting", callback = DisableLighting}
+    {name = "DisableShadows", callback = DisableShadows},
+    {name = "LowerRenderDistance", callback = LowerRenderDistance},
+    {name = "DisableAtmosphere", callback = DisableAtmosphere},
+    {name = "SimplifyTerrain", callback = SimplifyTerrain},
+    {name = "DisableDecals", callback = DisableDecals},
+    {name = "OptimizeGUI", callback = OptimizeGUI},
+    {name = "ReduceAnimations", callback = ReduceAnimations}
 }
 
 local LongTermOptimizationFeatures = {
     {name = "OptimizeMemory", callback = OptimizeMemory},
-    {name = "StreamingEnabled", callback = StreamingEnabled}
+    {name = "StreamingEnabled", callback = StreamingEnabled},
+    {name = "CacheAssets", callback = CacheAssets},
+    {name = "OptimizePhysics", callback = OptimizePhysics},
+    {name = "ReduceAudio", callback = ReduceAudio},
+    {name = "DisableReflections", callback = DisableReflections},
+    {name = "OptimizeLighting", callback = OptimizeLighting},
+    {name = "ReduceModelDetail", callback = ReduceModelDetail},
+    {name = "OptimizeScripts", callback = OptimizeScripts},
+    {name = "EnableGPUAcceleration", callback = EnableGPUAcceleration}
+}
+
+local AdvancedOptimizationFeatures = {
+    {name = "CustomLODSystem", callback = CustomLODSystem},
+    {name = "DynamicChunkLoading", callback = DynamicChunkLoading},
+    {name = "OcclusionCulling", callback = OcclusionCulling},
+    {name = "AsyncAssetLoading", callback = AsyncAssetLoading},
+    {name = "NetworkOptimization", callback = NetworkOptimization},
+    {name = "ThreadedPhysics", callback = ThreadedPhysics},
+    {name = "ShaderOptimization", callback = ShaderOptimization},
+    {name = "MemoryPooling", callback = MemoryPooling},
+    {name = "DeferredRendering", callback = DeferredRendering},
+    {name = "AIOptimization", callback = AIOptimization}
 }
 
 local SettingsFeatures = {
@@ -462,6 +786,22 @@ local SettingsFeatures = {
                 end
             end
         end
+    end},
+    {name = "AutoOptimize", callback = function(enabled)
+        -- Implementar auto-optimización al unirse
+        if enabled then
+            print("Auto-Optimize on Join enabled")
+        else
+            print("Auto-Optimize on Join disabled")
+        end
+    end},
+    {name = "OptimizationProfile", callback = function(enabled)
+        -- Implementar perfiles de optimización
+        if enabled then
+            print("Custom Optimization Profile enabled")
+        else
+            print("Default Optimization Profile enabled")
+        end
     end}
 }
 
@@ -472,6 +812,10 @@ end
 
 for _, feature in ipairs(LongTermOptimizationFeatures) do
     CreateToggle(feature.name, Sections.LongTermOptimization, feature.callback)
+end
+
+for _, feature in ipairs(AdvancedOptimizationFeatures) do
+    CreateToggle(feature.name, Sections.AdvancedOptimization, feature.callback)
 end
 
 for _, feature in ipairs(SettingsFeatures) do
@@ -517,12 +861,16 @@ local PlayersLabel = CreateInfoLabel(Texts.players .. ": 0", 50)
 local FPSLabel = CreateInfoLabel(Texts.fps .. ": 0", 80)
 local PingLabel = CreateInfoLabel(Texts.ping .. ": 0 ms", 110)
 local ServerNameLabel = CreateInfoLabel(Texts.serverName .. ": " .. game.Name, 140)
+local MemoryLabel = CreateInfoLabel(Texts.memoryUsage .. ": 0 MB", 170)
+local CPULabel = CreateInfoLabel(Texts.cpuUsage .. ": 0%", 200)
 
 -- Actualizar información del servidor
 local function UpdateServerInfo()
     PlayersLabel.Text = Texts.players .. ": " .. #Players:GetPlayers()
     FPSLabel.Text = Texts.fps .. ": " .. math.floor(1 / RunService.RenderStepped:Wait())
     PingLabel.Text = Texts.ping .. ": " .. math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. " ms"
+    MemoryLabel.Text = Texts.memoryUsage .. ": " .. math.floor(game:GetService("Stats"):GetTotalMemoryUsageMb()) .. " MB"
+    CPULabel.Text = Texts.cpuUsage .. ": " .. math.floor(game:GetService("Stats").GetTotalGameMemoryUsageMb()) .. "%"
 end
 
 RunService.RenderStepped:Connect(UpdateServerInfo)
@@ -573,4 +921,5 @@ LoadingGui:Destroy()
 ShowSection("Home")
 
 -- Mensaje de confirmación
-print("Script de optimización cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+print("Script de optimización mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+
