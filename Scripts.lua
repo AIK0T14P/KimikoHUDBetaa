@@ -13,6 +13,10 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local Camera = workspace.CurrentCamera
 
+-- New variables for respawn and position management
+local RespawnPoint = nil
+local SavedPositions = {}
+
 -- Sistema de idiomas
 local Languages = {
     ["English"] = {
@@ -53,7 +57,11 @@ local Languages = {
             LowGraphics = "Low Graphics",
             DisableEffects = "Disable Effects",
             ReduceTextures = "Reduce Textures",
-            DisableLighting = "Disable Lighting"
+            DisableLighting = "Disable Lighting",
+            SaveRespawn = "Save Respawn",
+            DeleteRespawn = "Delete Respawn",
+            SavePosition = "Save Position",
+            TeleportToPosition = "Teleport to Position"
         },
         loading = "Loading..."
     },
@@ -95,7 +103,11 @@ local Languages = {
             LowGraphics = "Gráficos Bajos",
             DisableEffects = "Desactivar Efectos",
             ReduceTextures = "Reducir Texturas",
-            DisableLighting = "Desactivar Iluminación"
+            DisableLighting = "Desactivar Iluminación",
+            SaveRespawn = "Guardar Punto de Respawn",
+            DeleteRespawn = "Eliminar Punto de Respawn",
+            SavePosition = "Guardar Posición",
+            TeleportToPosition = "Teletransportar a Posición"
         },
         loading = "Cargando..."
     }
@@ -744,6 +756,31 @@ local function ServerHop()
     end
 end
 
+-- New functions for respawn and position management
+local function SaveRespawnPoint()
+    RespawnPoint = Character.HumanoidRootPart.Position
+    print("Respawn point saved!")
+end
+
+local function DeleteRespawnPoint()
+    RespawnPoint = nil
+    print("Respawn point deleted!")
+end
+
+local function SavePosition(name)
+    SavedPositions[name] = Character.HumanoidRootPart.Position
+    print("Position '" .. name .. "' saved!")
+end
+
+local function TeleportToPosition(name)
+    if SavedPositions[name] then
+        Character.HumanoidRootPart.CFrame = CFrame.new(SavedPositions[name])
+        print("Teleported to '" .. name .. "'!")
+    else
+        print("Position '" .. name .. "' not found!")
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -791,7 +828,21 @@ local VisualFeatures = {
 local PlayerFeatures = {
     {name = "Invisibility", callback = Invisibility},
     {name = "AntiAFK", callback = function() end},
-    {name = "AutoReset", callback = function() end}
+    {name = "AutoReset", callback = function() end},
+    {name = "SaveRespawn", callback = SaveRespawnPoint},
+    {name = "DeleteRespawn", callback = DeleteRespawnPoint},
+    {name = "SavePosition", callback = function() 
+        local name = "Position" .. tostring(#SavedPositions + 1)
+        SavePosition(name)
+    end},
+    {name = "TeleportToPosition", callback = function()
+        -- This should be replaced with a proper UI for selecting a saved position
+        if #SavedPositions > 0 then
+            TeleportToPosition(SavedPositions[1])
+        else
+            print("No saved positions!")
+        end
+    end}
 }
 
 local WorldFeatures = {
