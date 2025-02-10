@@ -1463,5 +1463,101 @@ local SettingsFeatures = {
             for _, child in pairs(section:GetChildren()) do
                 if child:IsA("Frame") then
                     local label = child:FindFirstChild("TextLabel")
-                    if label an
+                    if label and label.Text then
+                        for featureName, translatedName in pairs(Texts.features) do
+                            if label.Text == Languages[CurrentLanguage == "English" and "Español" or "English"].features[featureName] then
+                                label.Text = translatedName
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end}
+}
 
+-- Crear toggles y sliders para cada característica
+for _, feature in ipairs(MovementFeatures) do
+    if feature.slider then
+        CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
+    else
+        CreateToggle(feature.name, Sections.Movement, feature.callback)
+    end
+end
+
+for _, feature in ipairs(CombatFeatures) do
+    CreateToggle(feature.name, Sections.Combat, feature.callback)
+end
+
+for _, feature in ipairs(VisualFeatures) do
+    CreateToggle(feature.name, Sections.Visuals, feature.callback)
+end
+
+for _, feature in ipairs(PlayerFeatures) do
+    CreateToggle(feature.name, Sections.Player, feature.callback)
+end
+
+for _, feature in ipairs(WorldFeatures) do
+    CreateToggle(feature.name, Sections.World, feature.callback)
+end
+
+for _, feature in ipairs(OptimizationFeatures) do
+    CreateToggle(feature.name, Sections.Optimization, feature.callback)
+end
+
+for _, feature in ipairs(MiscFeatures) do
+    CreateToggle(feature.name, Sections.Misc, feature.callback)
+end
+
+for _, feature in ipairs(SettingsFeatures) do
+    CreateToggle(feature.name, Sections.Settings, feature.callback)
+end
+
+-- Manejar la visibilidad de las secciones y mantener el color morado
+local function ShowSection(sectionName)
+    for name, section in pairs(Sections) do
+        section.Visible = (name == sectionName)
+        local button = Sidebar:FindFirstChild(name.."Category")
+        if button then
+            button.BackgroundColor3 = (name == sectionName) and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(45, 45, 45)
+        end
+    end
+    ActiveCategory = sectionName
+end
+
+for _, category in ipairs(Categories) do
+    local button = Sidebar:FindFirstChild(category.name.."Category")
+    if button then
+        button.MouseButton1Click:Connect(function()
+            ShowSection(category.name)
+        end)
+    end
+end
+
+-- Animación del botón de toggle
+ToggleButton.MouseButton1Click:Connect(function()
+    MainBorder.Visible = not MainBorder.Visible
+    local goal = {
+        Rotation = MainBorder.Visible and 180 or 0,
+        Size = MainBorder.Visible and UDim2.new(0, 610, 0, 410) or UDim2.new(0, 0, 0, 0)
+    }
+    TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
+    TweenService:Create(MainBorder, TweenInfo.new(0.3), {Size = goal.Size}):Play()
+end)
+
+-- Manejar el respawn del personaje
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    Humanoid = Character:WaitForChild("Humanoid")
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+end)
+
+-- Eliminar la GUI de carga
+LoadingGui:Destroy()
+
+-- Mostrar la primera sección por defecto
+ShowSection("Movement")
+
+-- Mensaje de confirmación
+print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
