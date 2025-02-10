@@ -316,6 +316,7 @@ local function CreateCategory(name, icon, position)
     CategoryButton.BorderSizePixel = 0
     CategoryButton.Font = Enum.Font.GothamSemibold
     CategoryButton.TextSize = 14
+    
     CategoryButton.Parent = Sidebar
     
     local IconImage = Instance.new("ImageLabel")
