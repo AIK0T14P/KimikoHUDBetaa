@@ -68,7 +68,30 @@ local Languages = {
             WallClimb = "Wall Climb",
             AirJump = "Air Jump",
             Glide = "Glide",
-            Teleport = "Teleport"
+            Teleport = "Teleport",
+            DoubleJump = "Double Jump",
+            WallRun = "Wall Run",
+            Blink = "Blink",
+            Grapple = "Grapple",
+            Slide = "Slide",
+            LongJump = "Long Jump",
+            HighJump = "High Jump",
+            SpeedBurst = "Speed Burst",
+            Levitate = "Levitate",
+            AirDash = "Air Dash",
+            Stomp = "Stomp",
+            WaterWalk = "Water Walk",
+            PhaseThrough = "Phase Through",
+            Moonwalk = "Moonwalk",
+            Backflip = "Backflip",
+            FrontFlip = "Front Flip",
+            Barrel Roll = "Barrel Roll",
+            Hover = "Hover",
+            WallJump = "Wall Jump",
+            AirStall = "Air Stall",
+            GroundPound = "Ground Pound",
+            SpiderClimb = "Spider Climb",
+            Telekinesis = "Telekinesis"
         },
         loading = "Loading..."
     },
@@ -121,7 +144,30 @@ local Languages = {
             WallClimb = "Escalar Paredes",
             AirJump = "Salto en Aire",
             Glide = "Planeo",
-            Teleport = "Teletransporte"
+            Teleport = "Teletransporte",
+            DoubleJump = "Doble Salto",
+            WallRun = "Carrera en Pared",
+            Blink = "Parpadeo",
+            Grapple = "Gancho",
+            Slide = "Deslizarse",
+            LongJump = "Salto Largo",
+            HighJump = "Salto Alto",
+            SpeedBurst = "Ráfaga de Velocidad",
+            Levitate = "Levitar",
+            AirDash = "Dash Aéreo",
+            Stomp = "Pisotón",
+            WaterWalk = "Caminar sobre el Agua",
+            PhaseThrough = "Atravesar",
+            Moonwalk = "Paso Lunar",
+            Backflip = "Voltereta Atrás",
+            FrontFlip = "Voltereta Adelante",
+            Barrel Roll = "Giro de Barril",
+            Hover = "Flotar",
+            WallJump = "Salto en Pared",
+            AirStall = "Parada en Aire",
+            GroundPound = "Golpe al Suelo",
+            SpiderClimb = "Trepar como Araña",
+            Telekinesis = "Telequinesis"
         },
         loading = "Cargando..."
     }
@@ -868,6 +914,379 @@ local function Teleport()
     HumanoidRootPart.CFrame = CFrame.new(target)
 end
 
+local function DoubleJump(enabled)
+    local doubleJumpCount = 0
+    local connection
+    if enabled then
+        connection = UserInputService.JumpRequest:Connect(function()
+            if doubleJumpCount < 1 then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                doubleJumpCount = doubleJumpCount + 1
+            end
+        end)
+        Humanoid.StateChanged:Connect(function(oldState, newState)
+            if newState == Enum.HumanoidStateType.Landed then
+                doubleJumpCount = 0
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function WallRun(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.RightVector * 1)
+            local hit, _ = workspace:FindPartOnRay(ray, Character)
+            if hit and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                Humanoid:Move(Vector3.new(0, 1, 0))
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Blink(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "e" then
+                local target = mouse.Hit.p
+                HumanoidRootPart.CFrame = CFrame.new(target)
+            end
+        end)
+    end
+end
+
+local function Grapple(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.Button1Down:Connect(function()
+            local target = mouse.Hit.p
+            local grappleBeam = Instance.new("Beam")
+            grappleBeam.Attachment0 = Instance.new("Attachment", HumanoidRootPart)
+            grappleBeam.Attachment1 = Instance.new("Attachment", workspace.Terrain)
+            grappleBeam.Attachment1.WorldPosition = target
+            grappleBeam.Width0 = 0.5
+            grappleBeam.Width1 = 0.5
+            grappleBeam.Parent = HumanoidRootPart
+            
+            local bodyVelocity = Instance.new("BodyVelocity", HumanoidRootPart)
+            bodyVelocity.Velocity = (target - HumanoidRootPart.Position).Unit * 50
+            bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            
+            wait(1)
+            grappleBeam:Destroy()
+            bodyVelocity:Destroy()
+        end)
+    end
+end
+
+local function Slide(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "c" and Humanoid:GetState() == Enum.HumanoidStateType.Running then
+                Humanoid.PlatformStand = true
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + HumanoidRootPart.Velocity.Unit)
+                HumanoidRootPart.Velocity = HumanoidRootPart.Velocity * 1.5
+                wait(1)
+                Humanoid.PlatformStand = false
+            end
+        end)
+    end
+end
+
+local function LongJump(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "x" and Humanoid:GetState() == Enum.HumanoidStateType.Running then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                HumanoidRootPart.Velocity = HumanoidRootPart.Velocity * Vector3.new(2, 1, 2)
+            end
+        end)
+    end
+end
+
+local function HighJump(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "h" then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                HumanoidRootPart.Velocity = Vector3.new(0, 100, 0)
+            end
+        end)
+    end
+end
+
+local function SpeedBurst(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "v" then
+                local originalSpeed = Humanoid.WalkSpeed
+                Humanoid.WalkSpeed = originalSpeed * 3
+                wait(1)
+                Humanoid.WalkSpeed = originalSpeed
+            end
+        end)
+    end
+end
+
+local function Levitate(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 5, HumanoidRootPart.Velocity.Z)
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function AirDash(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "q" and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                local lookVector = HumanoidRootPart.CFrame.LookVector
+                HumanoidRootPart.Velocity = lookVector * 100
+            end
+        end)
+    end
+end
+
+local function Stomp(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "f" and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                HumanoidRootPart.Velocity = Vector3.new(0, -100, 0)
+            end
+        end)
+    end
+end
+
+local function WaterWalk(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            local ray = Ray.new(HumanoidRootPart.Position, Vector3.new(0, -3.5, 0))
+            local hit, position = workspace:FindPartOnRay(ray, Character)
+            if hit and hit.Material == Enum.Material.Water then
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position.X, position.Y + 3.5, HumanoidRootPart.Position.Z)
+                Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function PhaseThrough(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "r" then
+                NoClip(true)
+                wait(1)
+                NoClip(false)
+            end
+        end)
+    end
+end
+
+local function Moonwalk(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            if Humanoid.MoveDirection.Magnitude > 0 then
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position - Humanoid.MoveDirection)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Backflip(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "b" and Humanoid:GetState() == Enum.HumanoidStateType.Running then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                HumanoidRootPart.Velocity = Vector3.new(0, 50, -20)
+                for i = 1, 360, 10 do
+                    HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.Angles(math.rad(10), 0, 0)
+                    RunService.Heartbeat:Wait()
+                end
+            end
+        end)
+    end
+end
+
+local function FrontFlip(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "n" and Humanoid:GetState() == Enum.HumanoidStateType.Running then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                HumanoidRootPart.Velocity = Vector3.new(0, 50, 20)
+                for i = 1, 360, 10 do
+                    HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.Angles(math.rad(-10), 0, 0)
+                    RunService.Heartbeat:Wait()
+                end
+            end
+        end)
+    end
+end
+
+local function BarrelRoll(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "m" and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                for i = 1, 360, 10 do
+                    HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.Angles(0, 0, math.rad(10))
+                    RunService.Heartbeat:Wait()
+                end
+            end
+        end)
+    end
+end
+
+local function Hover(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 0, HumanoidRootPart.Velocity.Z)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function WallJump(enabled)
+    if enabled then
+        local lastJumpTime = 0
+        local wallJumpCooldown = 1 -- seconds
+        local connection = RunService.Stepped:Connect(function()
+            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.LookVector * 2)
+            local hit, _ = workspace:FindPartOnRay(ray, Character)
+            if hit and Humanoid:GetState() == Enum.HumanoidStateType.Freefall and tick() - lastJumpTime > wallJumpCooldown then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 50, HumanoidRootPart.Velocity.Z) - HumanoidRootPart.CFrame.LookVector * 20
+                lastJumpTime = tick()
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function AirStall(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "j" and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                wait(0.5)
+            end
+        end)
+    end
+end
+
+local function GroundPound(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key == "g" and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                HumanoidRootPart.Velocity = Vector3.new(0, -100, 0)
+                local connection
+                connection = RunService.Stepped:Connect(function()
+                    if Humanoid:GetState() == Enum.HumanoidStateType.Landed then
+                        local explosion = Instance.new("Explosion")
+                        explosion.Position = HumanoidRootPart.Position
+                        explosion.BlastPressure = 500
+                        explosion.BlastRadius = 5
+                        explosion.Parent = workspace
+                        connection:Disconnect()
+                    end
+                end)
+            end
+        end)
+    end
+end
+
+local function SpiderClimb(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.LookVector * 1)
+            local hit, _ = workspace:FindPartOnRay(ray, Character)
+            if hit then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Climbing)
+                HumanoidRootPart.Velocity = Vector3.new(0, 10, 0)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Telekinesis(enabled)
+    if enabled then
+        local mouse = LocalPlayer:GetMouse()
+        local heldPart = nil
+        mouse.Button1Down:Connect(function()
+            local target = mouse.Target
+            if target and target:IsA("BasePart") and not target:IsDescendantOf(Character) then
+                heldPart = target
+                local bodyPosition = Instance.new("BodyPosition")
+                bodyPosition.Position = heldPart.Position
+                bodyPosition.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                bodyPosition.P = 1000
+                bodyPosition.Parent = heldPart
+            end
+        end)
+        mouse.Button1Up:Connect(function()
+            if heldPart then
+                heldPart.BodyPosition:Destroy()
+                heldPart = nil
+            end
+        end)
+        RunService.Stepped:Connect(function()
+            if heldPart then
+                local targetPos = HumanoidRootPart.Position + (HumanoidRootPart.CFrame.LookVector * 5) + Vector3.new(0, 2, 0)
+                heldPart.BodyPosition.Position = targetPos
+            end
+        end)
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -902,7 +1321,30 @@ local MovementFeatures = {
     {name = "WallClimb", callback = WallClimb},
     {name = "AirJump", callback = AirJump},
     {name = "Glide", callback = Glide},
-    {name = "Teleport", callback = Teleport}
+    {name = "Teleport", callback = Teleport},
+    {name = "DoubleJump", callback = DoubleJump},
+    {name = "WallRun", callback = WallRun},
+    {name = "Blink", callback = Blink},
+    {name = "Grapple", callback = Grapple},
+    {name = "Slide", callback = Slide},
+    {name = "LongJump", callback = LongJump},
+    {name = "HighJump", callback = HighJump},
+    {name = "SpeedBurst", callback = SpeedBurst},
+    {name = "Levitate", callback = Levitate},
+    {name = "AirDash", callback = AirDash},
+    {name = "Stomp", callback = Stomp},
+    {name = "WaterWalk", callback = WaterWalk},
+    {name = "PhaseThrough", callback = PhaseThrough},
+    {name = "Moonwalk", callback = Moonwalk},
+    {name = "Backflip", callback = Backflip},
+    {name = "FrontFlip", callback = FrontFlip},
+    {name = "BarrelRoll", callback = BarrelRoll},
+    {name = "Hover", callback = Hover},
+    {name = "WallJump", callback = WallJump},
+    {name = "AirStall", callback = AirStall},
+    {name = "GroundPound", callback = GroundPound},
+    {name = "SpiderClimb", callback = SpiderClimb},
+    {name = "Telekinesis", callback = Telekinesis}
 }
 
 local CombatFeatures = {
@@ -1021,102 +1463,5 @@ local SettingsFeatures = {
             for _, child in pairs(section:GetChildren()) do
                 if child:IsA("Frame") then
                     local label = child:FindFirstChild("TextLabel")
-                    if label and label.Text then
-                        for featureName, translatedName in pairs(Texts.features) do
-                            if label.Text == Languages[CurrentLanguage == "English" and "Español" or "English"].features[featureName] then
-                                label.Text = translatedName
-                                break
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end}
-}
-
--- Crear toggles y sliders para cada característica
-for _, feature in ipairs(MovementFeatures) do
-    if feature.slider then
-        CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
-    else
-        CreateToggle(feature.name, Sections.Movement, feature.callback)
-    end
-end
-
-for _, feature in ipairs(CombatFeatures) do
-    CreateToggle(feature.name, Sections.Combat, feature.callback)
-end
-
-for _, feature in ipairs(VisualFeatures) do
-    CreateToggle(feature.name, Sections.Visuals, feature.callback)
-end
-
-for _, feature in ipairs(PlayerFeatures) do
-    CreateToggle(feature.name, Sections.Player, feature.callback)
-end
-
-for _, feature in ipairs(WorldFeatures) do
-    CreateToggle(feature.name, Sections.World, feature.callback)
-end
-
-for _, feature in ipairs(OptimizationFeatures) do
-    CreateToggle(feature.name, Sections.Optimization, feature.callback)
-end
-
-for _, feature in ipairs(MiscFeatures) do
-    CreateToggle(feature.name, Sections.Misc, feature.callback)
-end
-
-for _, feature in ipairs(SettingsFeatures) do
-    CreateToggle(feature.name, Sections.Settings, feature.callback)
-end
-
--- Manejar la visibilidad de las secciones y mantener el color morado
-local function ShowSection(sectionName)
-    for name, section in pairs(Sections) do
-        section.Visible = (name == sectionName)
-        local button = Sidebar:FindFirstChild(name.."Category")
-        if button then
-            button.BackgroundColor3 = (name == sectionName) and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(45, 45, 45)
-        end
-    end
-    ActiveCategory = sectionName
-end
-
-for _, category in ipairs(Categories) do
-    local button = Sidebar:FindFirstChild(category.name.."Category")
-    if button then
-        button.MouseButton1Click:Connect(function()
-            ShowSection(category.name)
-        end)
-    end
-end
-
--- Animación del botón de toggle
-ToggleButton.MouseButton1Click:Connect(function()
-    MainBorder.Visible = not MainBorder.Visible
-    local goal = {
-        Rotation = MainBorder.Visible and 180 or 0,
-        Size = MainBorder.Visible and UDim2.new(0, 610, 0, 410) or UDim2.new(0, 0, 0, 0)
-    }
-    TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
-    TweenService:Create(MainBorder, TweenInfo.new(0.3), {Size = goal.Size}):Play()
-end)
-
--- Manejar el respawn del personaje
-LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-    Character = newCharacter
-    Humanoid = Character:WaitForChild("Humanoid")
-    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-end)
-
--- Eliminar la GUI de carga
-LoadingGui:Destroy()
-
--- Mostrar la primera sección por defecto
-ShowSection("Movement")
-
--- Mensaje de confirmación
-print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+                    if label an
 
