@@ -1,9 +1,9 @@
 -- Services
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 
 -- Variables principales
@@ -61,7 +61,14 @@ local Languages = {
             SaveRespawn = "Save Respawn",
             DeleteRespawn = "Delete Respawn",
             SavePosition = "Save Position",
-            TeleportToPosition = "Teleport to Position"
+            TeleportToPosition = "Teleport to Position",
+            Jump = "Jump",
+            Dash = "Dash",
+            Crouch = "Crouch",
+            WallClimb = "Wall Climb",
+            AirJump = "Air Jump",
+            Glide = "Glide",
+            Teleport = "Teleport"
         },
         loading = "Loading..."
     },
@@ -107,7 +114,14 @@ local Languages = {
             SaveRespawn = "Guardar Punto de Respawn",
             DeleteRespawn = "Eliminar Punto de Respawn",
             SavePosition = "Guardar Posición",
-            TeleportToPosition = "Teletransportar a Posición"
+            TeleportToPosition = "Teletransportar a Posición",
+            Jump = "Salto",
+            Dash = "Deslizamiento",
+            Crouch = "Agacharse",
+            WallClimb = "Escalar Paredes",
+            AirJump = "Salto en Aire",
+            Glide = "Planeo",
+            Teleport = "Teletransporte"
         },
         loading = "Cargando..."
     }
@@ -121,7 +135,7 @@ local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "LoadingGui"
 LoadingGui.ResetOnSpawn = false
 LoadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-LoadingGui.Parent = game.CoreGui
+LoadingGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -161,7 +175,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "EnhancedGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Botón para mostrar/ocultar
 local ToggleButton = Instance.new("ImageButton")
@@ -184,7 +198,7 @@ MainBorder.Size = UDim2.new(0, 610, 0, 410)
 MainBorder.Position = UDim2.new(0.5, -305, 0.5, -205)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
-MainBorder.Visible = false
+MainBorder.Visible = true  -- Cambiado a true para que sea visible por defecto
 MainBorder.Parent = ScreenGui
 
 -- Añadir gradiente al borde
@@ -251,7 +265,7 @@ local function CreateCategory(name, icon, position)
     local CategoryButton = Instance.new("TextButton")
     CategoryButton.Name = name.."Category"
     CategoryButton.Size = UDim2.new(1, -20, 0, 40)
-    CategoryButton.Position = UDim2.new(0, 10, 0, position + 20)
+    CategoryButton.Position = UDim2.new(0, 10, 0, position)
     CategoryButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     CategoryButton.BorderSizePixel = 0
     CategoryButton.Font = Enum.Font.GothamSemibold
@@ -781,6 +795,79 @@ local function TeleportToPosition(name)
     end
 end
 
+-- New movement functions
+local function Jump(enabled)
+    if enabled then
+        Humanoid.Jump = true
+    end
+end
+
+local function Dash(enabled)
+    if enabled then
+        local direction = HumanoidRootPart.CFrame.LookVector
+        HumanoidRootPart.Velocity = direction * 100
+    end
+end
+
+local function Crouch(enabled)
+    if enabled then
+        Humanoid.CameraOffset = Vector3.new(0, -1, 0)
+    else
+        Humanoid.CameraOffset = Vector3.new(0, 0, 0)
+    end
+end
+
+local function WallClimb(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.LookVector * 1)
+            local hit, _ = workspace:FindPartOnRay(ray, Character)
+            if hit and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Climbing)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function AirJump(enabled)
+    local connection
+    if enabled then
+        connection = UserInputService.JumpRequest:Connect(function()
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Glide(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, -2, HumanoidRootPart.Velocity.Z)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Teleport()
+    local mouse = LocalPlayer:GetMouse()
+    local target = mouse.Hit.p
+    HumanoidRootPart.CFrame = CFrame.new(target)
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -808,7 +895,14 @@ local MovementFeatures = {
     {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
     {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
     {name = "InfiniteJump", callback = InfiniteJump},
-    {name = "NoClip", callback = NoClip}
+    {name = "NoClip", callback = NoClip},
+    {name = "Jump", callback = Jump},
+    {name = "Dash", callback = Dash},
+    {name = "Crouch", callback = Crouch},
+    {name = "WallClimb", callback = WallClimb},
+    {name = "AirJump", callback = AirJump},
+    {name = "Glide", callback = Glide},
+    {name = "Teleport", callback = Teleport}
 }
 
 local CombatFeatures = {
@@ -1025,3 +1119,4 @@ ShowSection("Movement")
 
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+
