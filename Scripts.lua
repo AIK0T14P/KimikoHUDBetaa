@@ -101,7 +101,7 @@ features = {
     Telekinesis = "Telequinesis"
 },
 loading = "Cargando..."
-
+    },
     ["Español"] = {
         -- ... (Spanish translations, similar to English but translated)
     }
