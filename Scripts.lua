@@ -703,9 +703,6 @@ local function DamageMultiplier(enabled)
                 if damage and damage:IsA("NumberValue") then
                     damage.Value = damage.Value * 2
                 end
-            en
-                    damage.Value = damage.Value * 2
-                end
             end
         end
     else
