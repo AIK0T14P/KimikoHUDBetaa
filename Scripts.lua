@@ -90,7 +90,7 @@ local Languages = {
             AutoReload = "Recarga Automática",
             RapidMelee = "Combate Cuerpo a Cuerpo Rápido"
         },
-        loading = "Loading..."
+        loading = "Cargando..."
     },
     ["Español"] = {
         -- ... (Spanish translations, similar to English but translated)
