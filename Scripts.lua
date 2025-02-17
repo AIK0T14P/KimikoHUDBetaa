@@ -20,78 +20,88 @@ local SavedPositions = {}
 -- Sistema de idiomas
 local Languages = {
     ["English"] = {
-        categories = {
-            Movement = "Movimiento",
-            Combat = "Combate",
-            Visuals = "Visuales",
-            Player = "Jugador",
-            World = "Mundo",
-            Optimization = "Optimización",
-            Misc = "Varios",
-            Settings = "Configuración"
-        },
-        features = {
-            Fly = "Volar",
-            Speed = "Velocidad",
-            SuperJump = "Super Salto",
-            InfiniteJump = "Salto Infinito",
-            NoClip = "Sin Clip",
-            GodMode = "Modo Dios",
-            KillAura = "Aura Mortal",
-            AutoParry = "Parada Automática",
-            Reach = "Alcance",
-            ESP = "ESP",
-            Chams = "Chams",
-            Tracers = "Trazadores",
-            Fullbright = "Totalmente Iluminado",
-            Invisibility = "Invisibilidad",
-            AntiAFK = "Anti AFK",
-            AutoReset = "Reinicio Automático",
-            RemoveFog = "Eliminar Niebla",
-            DayNight = "Día/Noche",
-            RemoveTextures = "Eliminar Texturas",
-            ChatSpam = "Spam de Chat",
-            AutoFarm = "Auto Granja",
-            ServerHop = "Salto de Servidor",
-            Language = "Idioma",
-            LowGraphics = "Gráficos Bajos",
-            DisableEffects = "Desactivar Efectos",
-            ReduceTextures = "Reducir Texturas",
-            DisableLighting = "Desactivar Iluminación",
-            SaveRespawn = "Guardar Respawn",
-            DeleteRespawn = "Eliminar Respawn",
-            SavePosition = "Guardar Posición",
-            TeleportToPosition = "Teletransportarse a Posición",
-            Jump = "Saltar",
-            Dash = "Dash",
-            Crouch = "Agacharse",
-            WallClimb = "Escalar Pared",
-            AirJump = "Salto Aéreo",
-            Glide = "Planeo",
-            Teleport = "Teletransportarse",
-            AutoDodge = "Esquiva Automática",
-            AutoAim = "Apuntar Automático",
-            RapidFire = "Fuego Rápido",
-            InfiniteAmmo = "Munición Infinita",
-            DamageMultiplier = "Multiplicador de Daño",
-            AutoBlock = "Bloqueo Automático",
-            CriticalHit = "Golpe Crítico",
-            Aimbot = "Aimbot",
-            SilentAim = "Apuntar Silencioso",
-            Wallbang = "Traspasar Pared",
-            InstantKill = "Muerte Instantánea",
-            AutoHeal = "Curación Automática",
-            Triggerbot = "Triggerbot",
-            BunnyHop = "Bunny Hop",
-            SpinBot = "Spin Bot",
-            AntiAim = "Anti Apuntar",
-            HitboxExpander = "Expansor de Hitbox",
-            WeaponMods = "Modificaciones de Armas",
-            AutoReload = "Recarga Automática",
-            RapidMelee = "Combate Cuerpo a Cuerpo Rápido"
-        },
-        loading = "Cargando..."
-    },
+categories = {
+    Movement = "Movimiento",
+    Combat = "Combate",
+    Visuals = "Visuales",
+    Player = "Jugador",
+    World = "Mundo",
+    Optimization = "Optimización",
+    Misc = "Varios",
+    Settings = "Configuración"
+},
+features = {
+    Fly = "Volar",
+    Speed = "Velocidad",
+    SuperJump = "Super Salto",
+    InfiniteJump = "Salto Infinito",
+    NoClip = "Sin Clip",
+    GodMode = "Modo Dios",
+    KillAura = "Aura Mortal",
+    AutoParry = "Parada Automática",
+    Reach = "Alcance",
+    ESP = "ESP",
+    Chams = "Chams",
+    Tracers = "Trazadores",
+    Fullbright = "Totalmente Iluminado",
+    Invisibility = "Invisibilidad",
+    AntiAFK = "Anti AFK",
+    AutoReset = "Reinicio Automático",
+    RemoveFog = "Eliminar Niebla",
+    DayNight = "Día/Noche",
+    RemoveTextures = "Eliminar Texturas",
+    ChatSpam = "Spam de Chat",
+    AutoFarm = "Auto Granja",
+    ServerHop = "Salto de Servidor",
+    Language = "Idioma",
+    LowGraphics = "Gráficos Bajos",
+    DisableEffects = "Desactivar Efectos",
+    ReduceTextures = "Reducir Texturas",
+    DisableLighting = "Desactivar Iluminación",
+    SaveRespawn = "Guardar Respawn",
+    DeleteRespawn = "Eliminar Respawn",
+    SavePosition = "Guardar Posición",
+    TeleportToPosition = "Teletransportarse a Posición",
+    Jump = "Saltar",
+    Dash = "Dash",
+    Crouch = "Agacharse",
+    WallClimb = "Escalar Pared",
+    AirJump = "Salto Aéreo",
+    Glide = "Planeo",
+    Teleport = "Teletransportarse",
+    AutoDodge = "Esquiva Automática",
+    AutoAim = "Apuntar Automático",
+    RapidFire = "Fuego Rápido",
+    InfiniteAmmo = "Munición Infinita",
+    DamageMultiplier = "Multiplicador de Daño",
+    AutoBlock = "Bloqueo Automático",
+    CriticalHit = "Golpe Crítico",
+    Aimbot = "Aimbot",
+    SilentAim = "Apuntar Silencioso",
+    Wallbang = "Traspasar Pared",
+    InstantKill = "Muerte Instantánea",
+    AutoHeal = "Curación Automática",
+    Triggerbot = "Triggerbot",
+    BunnyHop = "Bunny Hop",
+    SpinBot = "Spin Bot",
+    AntiAim = "Anti Apuntar",
+    HitboxExpander = "Expansor de Hitbox",
+    WeaponMods = "Modificaciones de Armas",
+    AutoReload = "Recarga Automática",
+    RapidMelee = "Combate Cuerpo a Cuerpo Rápido",
+    WallRun = "Correr por la Pared",
+    DoubleJump = "Doble Salto",
+    AirDash = "Dash Aéreo",
+    Slide = "Deslizarse",
+    Grapple = "Gancho",
+    SpeedBoost = "Aumento de Velocidad",
+    JumpBoost = "Aumento de Salto",
+    Levitation = "Levitación",
+    Blink = "Parpadeo",
+    Telekinesis = "Telequinesis"
+},
+loading = "Cargando..."
+
     ["Español"] = {
         -- ... (Spanish translations, similar to English but translated)
     }
@@ -164,8 +174,9 @@ ToggleCorner.Parent = ToggleButton
 -- Frame Principal con borde morado y gradiente
 local MainBorder = Instance.new("Frame")
 MainBorder.Name = "MainBorder"
-MainBorder.Size = UDim2.new(0, 610, 0, 410)
-MainBorder.Position = UDim2.new(0.5, -305, 0.5, -205)
+MainBorder.Size = UDim2.new(0.8, 0, 0.8, 0)
+MainBorder.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainBorder.AnchorPoint = Vector2.new(0.5, 0.5)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
 MainBorder.Visible = true
@@ -213,7 +224,7 @@ Title.Parent = MainFrame
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 150, 1, -50)
+Sidebar.Size = UDim2.new(0.25, 0, 1, -50)
 Sidebar.Position = UDim2.new(0, 0, 0, 50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.1
@@ -223,8 +234,8 @@ Sidebar.Parent = MainFrame
 -- Contenedor principal
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -150, 1, -50)
-ContentFrame.Position = UDim2.new(0, 150, 0, 50)
+ContentFrame.Size = UDim2.new(0.75, 0, 1, -50)
+ContentFrame.Position = UDim2.new(0.25, 0, 0, 50)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ContentFrame.BackgroundTransparency = 0.1
 ContentFrame.BorderSizePixel = 0
@@ -1034,6 +1045,184 @@ local function RapidMelee(enabled)
     end
 end
 
+local function WallRun(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.RightVector * 4)
+            local hit, pos, normal = workspace:FindPartOnRay(ray, Character)
+            if hit then
+                HumanoidRootPart.Velocity = Vector3.new(0, 20, 0)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function DoubleJump(enabled)
+    local jumps = 0
+    local connection
+    if enabled then
+        connection = Humanoid.StateChanged:Connect(function(oldState, newState)
+            if newState == Enum.HumanoidStateType.Landed then
+                jumps = 0
+            elseif newState == Enum.HumanoidStateType.Jumping then
+                if jumps < 1 then
+                    jumps = jumps + 1
+                    Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function AirDash(enabled)
+    local connection
+    if enabled then
+        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftShift and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                local direction = HumanoidRootPart.CFrame.LookVector
+                HumanoidRootPart.Velocity = direction * 100
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Slide(enabled)
+    local connection
+    if enabled then
+        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == Enum.KeyCode.C and Humanoid:GetState() == Enum.HumanoidStateType.Running then
+                Humanoid.Sit = true
+                HumanoidRootPart.Velocity = HumanoidRootPart.CFrame.LookVector * 50
+                wait(1)
+                Humanoid.Sit = false
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Grapple(enabled)
+    local tool = Instance.new("Tool")
+    tool.Name = "Grapple"
+    tool.Parent = LocalPlayer.Backpack
+
+    local function Grapple()
+        local mouse = LocalPlayer:GetMouse()
+        local target = mouse.Hit.Position
+        local direction = (target - HumanoidRootPart.Position).Unit
+        HumanoidRootPart.Velocity = direction * 100
+    end
+
+    if enabled then
+        tool.Activated:Connect(Grapple)
+    else
+        tool:Destroy()
+    end
+end
+
+local function SpeedBoost(enabled)
+    if enabled then
+        Humanoid.WalkSpeed = Humanoid.WalkSpeed * 2
+    else
+        Humanoid.WalkSpeed = 16
+    end
+end
+
+local function JumpBoost(enabled)
+    if enabled then
+        Humanoid.JumpPower = Humanoid.JumpPower * 2
+    else
+        Humanoid.JumpPower = 50
+    end
+end
+
+local function Levitation(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            HumanoidRootPart.Velocity = Vector3.new(0, 5, 0)
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Blink(enabled)
+    local connection
+    if enabled then
+        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+                local direction = HumanoidRootPart.CFrame.LookVector
+                HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + direction * 20
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Telekinesis(enabled)
+    local mouse = LocalPlayer:GetMouse()
+    local heldObject = nil
+    local connection
+
+    if enabled then
+        connection = mouse.Button1Down:Connect(function()
+            local target = mouse.Target
+            if target and target:IsA("BasePart") and not target:IsDescendantOf(Character) then
+                heldObject = target
+                local bodyPosition = Instance.new("BodyPosition")
+                bodyPosition.Position = heldObject.Position
+                bodyPosition.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                bodyPosition.Parent = heldObject
+            end
+        end)
+
+        mouse.Button1Up:Connect(function()
+            if heldObject then
+                heldObject:FindFirstChildOfClass("BodyPosition"):Destroy()
+                heldObject = nil
+            end
+        end)
+
+        RunService.RenderStepped:Connect(function()
+            if heldObject then
+                local bodyPosition = heldObject:FindFirstChildOfClass("BodyPosition")
+                if bodyPosition then
+                    bodyPosition.Position = mouse.Hit.Position
+                end
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+        if heldObject and heldObject:FindFirstChildOfClass("BodyPosition") then
+            heldObject:FindFirstChildOfClass("BodyPosition"):Destroy()
+        end
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -1062,7 +1251,17 @@ local MovementFeatures = {
     {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
     {name = "InfiniteJump", callback = InfiniteJump},
     {name = "NoClip", callback = NoClip},
-    {name = "BunnyHop", callback = BunnyHop}
+    {name = "BunnyHop", callback = BunnyHop},
+    {name = "WallRun", callback = WallRun},
+    {name = "DoubleJump", callback = DoubleJump},
+    {name = "AirDash", callback = AirDash},
+    {name = "Slide", callback = Slide},
+    {name = "Grapple", callback = Grapple},
+    {name = "SpeedBoost", callback = SpeedBoost},
+    {name = "JumpBoost", callback = JumpBoost},
+    {name = "Levitation", callback = Levitation},
+    {name = "Blink", callback = Blink},
+    {name = "Telekinesis", callback = Telekinesis}
 }
 
 local CombatFeatures = {
@@ -1282,7 +1481,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainBorder.Visible = not MainBorder.Visible
     local goal = {
         Rotation = MainBorder.Visible and 180 or 0,
-        Size = MainBorder.Visible and UDim2.new(0, 610, 0, 410) or UDim2.new(0, 0, 0, 0)
+        Size = MainBorder.Visible and UDim2.new(0.8, 0, 0.8, 0) or UDim2.new(0, 0, 0, 0)
     }
     TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
     TweenService:Create(MainBorder, TweenInfo.new(0.3), {Size = goal.Size}):Play()
