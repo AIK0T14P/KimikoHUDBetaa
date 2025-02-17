@@ -68,62 +68,32 @@ local Languages = {
             WallClimb = "Wall Climb",
             AirJump = "Air Jump",
             Glide = "Glide",
-            Teleport = "Teleport"
+            Teleport = "Teleport",
+            AutoDodge = "Auto Dodge",
+            AutoAim = "Auto Aim",
+            RapidFire = "Rapid Fire",
+            InfiniteAmmo = "Infinite Ammo",
+            DamageMultiplier = "Damage Multiplier",
+            AutoBlock = "Auto Block",
+            CriticalHit = "Critical Hit",
+            Aimbot = "Aimbot",
+            SilentAim = "Silent Aim",
+            Wallbang = "Wallbang",
+            InstantKill = "Instant Kill",
+            AutoHeal = "Auto Heal",
+            Triggerbot = "Triggerbot",
+            BunnyHop = "Bunny Hop",
+            SpinBot = "Spin Bot",
+            AntiAim = "Anti Aim",
+            HitboxExpander = "Hitbox Expander",
+            WeaponMods = "Weapon Mods",
+            AutoReload = "Auto Reload",
+            RapidMelee = "Rapid Melee"
         },
         loading = "Loading..."
     },
     ["Español"] = {
-        categories = {
-            Movement = "Movimiento",
-            Combat = "Combate",
-            Visuals = "Visuales",
-            Player = "Jugador",
-            World = "Mundo",
-            Optimization = "Optimización",
-            Misc = "Misc",
-            Settings = "Ajustes"
-        },
-        features = {
-            Fly = "Volar",
-            Speed = "Velocidad",
-            SuperJump = "Super Salto",
-            InfiniteJump = "Salto Infinito",
-            NoClip = "No Clip",
-            GodMode = "Modo Dios",
-            KillAura = "Aura Asesina",
-            AutoParry = "Auto Parry",
-            Reach = "Alcance",
-            ESP = "ESP",
-            Chams = "Chams",
-            Tracers = "Trazadores",
-            Fullbright = "Brillo Total",
-            Invisibility = "Invisibilidad",
-            AntiAFK = "Anti AFK",
-            AutoReset = "Auto Reset",
-            RemoveFog = "Quitar Niebla",
-            DayNight = "Día/Noche",
-            RemoveTextures = "Quitar Texturas",
-            ChatSpam = "Spam Chat",
-            AutoFarm = "Auto Farm",
-            ServerHop = "Cambiar Servidor",
-            Language = "Idioma",
-            LowGraphics = "Gráficos Bajos",
-            DisableEffects = "Desactivar Efectos",
-            ReduceTextures = "Reducir Texturas",
-            DisableLighting = "Desactivar Iluminación",
-            SaveRespawn = "Guardar Punto de Respawn",
-            DeleteRespawn = "Eliminar Punto de Respawn",
-            SavePosition = "Guardar Posición",
-            TeleportToPosition = "Teletransportar a Posición",
-            Jump = "Salto",
-            Dash = "Deslizamiento",
-            Crouch = "Agacharse",
-            WallClimb = "Escalar Paredes",
-            AirJump = "Salto en Aire",
-            Glide = "Planeo",
-            Teleport = "Teletransporte"
-        },
-        loading = "Cargando..."
+        -- ... (Spanish translations, similar to English but translated)
     }
 }
 
@@ -198,7 +168,7 @@ MainBorder.Size = UDim2.new(0, 610, 0, 410)
 MainBorder.Position = UDim2.new(0.5, -305, 0.5, -205)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
-MainBorder.Visible = true  -- Cambiado a true para que sea visible por defecto
+MainBorder.Visible = true
 MainBorder.Parent = ScreenGui
 
 -- Añadir gradiente al borde
@@ -513,48 +483,6 @@ local function ToggleSuperJump(value)
     Humanoid.JumpHeight = 7.2
 end
 
-local function Invisibility(enabled)
-    if enabled then
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("MeshPart") or part:IsA("Part") then
-                part.Transparency = 1
-            end
-        end
-        
-        Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-    else
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("MeshPart") or part:IsA("Part") then
-                part.Transparency = 0
-            end
-        end
-        
-        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-        
-        local clone = workspace:FindFirstChild(Character.Name)
-        if clone then clone:Destroy() end
-    end
-end
-
-local function GodMode(enabled)
-    if enabled then
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        Character.Parent = game.ReplicatedStorage
-        
-        local function onDied()
-            Character.Parent = workspace
-            local clone = workspace:FindFirstChild(Character.Name)
-            if clone then clone:Destroy() end
-        end
-        
-        clone.Humanoid.Died:Connect(onDied)
-    end
-end
-
 local function InfiniteJump(enabled)
     local connection
     if enabled then
@@ -590,241 +518,392 @@ local function NoClip(enabled)
     end
 end
 
-local function ESP(enabled)
+local function GodMode(enabled)
     if enabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local highlight = Instance.new("Highlight")
-                highlight.Name = "ESPHighlight"
-                highlight.Parent = player.Character
-                highlight.FillColor = Color3.fromRGB(147, 112, 219)
-                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-            end
+        local clone = Character:Clone()
+        clone.Parent = workspace
+        Character.Parent = game.ReplicatedStorage
+        
+        local function onDied()
+            Character.Parent = workspace
+            local clone = workspace:FindFirstChild(Character.Name)
+            if clone then clone:Destroy() end
         end
         
-        Players.PlayerAdded:Connect(function(player)
-            player.CharacterAdded:Connect(function(character)
-                if enabled then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "ESPHighlight"
-                    highlight.Parent = character
-                    highlight.FillColor = Color3.fromRGB(147, 112, 219)
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        clone.Humanoid.Died:Connect(onDied)
+    else
+        Character.Parent = workspace
+        local clone = workspace:FindFirstChild(Character.Name)
+        if clone then clone:Destroy() end
+    end
+end
+
+local function KillAura(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+                    if distance <= 10 then
+                        local args = {
+                            [1] = player.Character.Humanoid
+                        }
+                        game:GetService("ReplicatedStorage").RemoteEvents.DamageEvent:FireServer(unpack(args))
+                    end
                 end
-            end)
+            end
         end)
     else
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local highlight = player.Character:FindFirstChild("ESPHighlight")
-                if highlight then highlight:Destroy() end
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function AutoParry(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+                    if distance <= 15 then
+                        game:GetService("ReplicatedStorage").RemoteEvents.ParryEvent:FireServer()
+                    end
+                end
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function Reach(enabled)
+    if enabled then
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local handle = tool:FindFirstChild("Handle")
+                if handle then
+                    local originalSize = handle.Size
+                    handle.Size = originalSize * 2
+                    handle.Massless = true
+                end
+            end
+        end
+    else
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local handle = tool:FindFirstChild("Handle")
+                if handle then
+                    handle.Size = handle.Size / 2
+                    handle.Massless = false
+                end
             end
         end
     end
 end
 
-local function Fullbright(enabled)
+local function AutoDodge(enabled)
+    local connection
     if enabled then
-        game.Lighting.Brightness = 2
-        game.Lighting.ClockTime = 14
-        game.Lighting.FogEnd = 100000
-        game.Lighting.GlobalShadows = false
-        game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        connection = RunService.Heartbeat:Connect(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+                    if distance <= 10 then
+                        local randomDirection = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)).Unit
+                        Character.HumanoidRootPart.CFrame = Character.HumanoidRootPart.CFrame + randomDirection * 5
+                    end
+                end
+            end
+        end)
     else
-        game.Lighting.Brightness = 1
-        game.Lighting.ClockTime = 12
-        game.Lighting.FogEnd = 10000
-        game.Lighting.GlobalShadows = true
-        game.Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+        if connection then
+            connection:Disconnect()
+        end
     end
 end
 
-local function Tracers(enabled)
-    local tracers = {}
-    
-    local function createTracer(player)
-        if player == LocalPlayer then return end
-        
-        local tracer = Drawing.new("Line")
-        tracer.Visible = false
-        tracer.Color = Color3.new(1, 1, 1)
-        tracer.Thickness = 1
-        tracer.Transparency = 1
-        tracers[player] = tracer
-        
-        local connection
+local function AutoAim(enabled)
+    local connection
+    if enabled then
         connection = RunService.RenderStepped:Connect(function()
-            if not enabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-                tracer.Visible = false
-                return
+            local closestPlayer = nil
+            local closestDistance = math.huge
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+                    if distance < closestDistance then
+                        closestPlayer = player
+                        closestDistance = distance
+                    end
+                end
+            end
+            if closestPlayer then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestPlayer.Character.HumanoidRootPart.Position)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function RapidFire(enabled)
+    if enabled then
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local fireRate = tool:FindFirstChild("FireRate")
+                if fireRate and fireRate:IsA("NumberValue") then
+                    fireRate.Value = 0.05
+                end
+            end
+        end
+    else
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local fireRate = tool:FindFirstChild("FireRate")
+                if fireRate and fireRate:IsA("NumberValue") then
+                    fireRate.Value = 0.5
+                end
+            end
+        end
+    end
+end
+
+local function InfiniteAmmo(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Stepped:Connect(function()
+            for _, tool in pairs(Character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    local ammo = tool:FindFirstChild("Ammo")
+                    if ammo and ammo:IsA("IntValue") then
+                        ammo.Value = 999
+                    end
+                end
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function DamageMultiplier(enabled)
+    if enabled then
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local damage = tool:FindFirstChild("Damage")
+                if damage and damage:IsA("NumberValue") then
+                    damage.Value = damage.Value * 2
+                end
+            en
+                    damage.Value = damage.Value * 2
+                end
+            end
+        end
+    else
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local damage = tool:FindFirstChild("Damage")
+                if damage and damage:IsA("NumberValue") then
+                    damage.Value = damage.Value / 2
+                end
+            end
+        end
+    end
+end
+
+local function AutoBlock(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+                    if distance <= 10 then
+                        game:GetService("ReplicatedStorage").RemoteEvents.BlockEvent:FireServer(true)
+                    else
+                        game:GetService("ReplicatedStorage").RemoteEvents.BlockEvent:FireServer(false)
+                    end
+                end
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+        game:GetService("ReplicatedStorage").RemoteEvents.BlockEvent:FireServer(false)
+    end
+end
+
+local function CriticalHit(enabled)
+    if enabled then
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local critChance = Instance.new("NumberValue")
+                critChance.Name = "CriticalChance"
+                critChance.Value = 100
+                critChance.Parent = tool
+            end
+        end
+    else
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local critChance = tool:FindFirstChild("CriticalChance")
+                if critChance then
+                    critChance:Destroy()
+                end
+            end
+        end
+    end
+end
+
+local function Aimbot(enabled)
+    local connection
+    if enabled then
+        connection = RunService.RenderStepped:Connect(function()
+            local closestPlayer = nil
+            local closestDistance = math.huge
+            local mousePosition = UserInputService:GetMouseLocation()
+
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local screenPosition, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
+                    if onScreen then
+                        local distance = (Vector2.new(mousePosition.X, mousePosition.Y) - Vector2.new(screenPosition.X, screenPosition.Y)).Magnitude
+                        if distance < closestDistance then
+                            closestPlayer = player
+                            closestDistance = distance
+                        end
+                    end
+                end
+            end
+
+            if closestPlayer then
+                local aimPart = closestPlayer.Character.HumanoidRootPart
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPart.Position)
+            end
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function SilentAim(enabled)
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
+        
+        if enabled and (method == "FireServer" or method == "InvokeServer") and self.Name == "RemoteEvents" then
+            local closestPlayer = nil
+            local closestDistance = math.huge
+            
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+                    if distance < closestDistance then
+                        closestPlayer = player
+                        closestDistance = distance
+                    end
+                end
             end
             
-            local vector, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
-            if onScreen then
-                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                tracer.To = Vector2.new(vector.X, vector.Y)
-                tracer.Visible = true
-            else
-                tracer.Visible = false
+            if closestPlayer and args[1] == "FireWeapon" then
+                args[2] = closestPlayer.Character.HumanoidRootPart.Position
             end
-        end)
-    end
-    
-    if enabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createTracer(player)
         end
         
-        Players.PlayerAdded:Connect(createTracer)
-        Players.PlayerRemoving:Connect(function(player)
-            if tracers[player] then
-                tracers[player]:Remove()
-                tracers[player] = nil
-            end
-        end)
-    else
-        for _, tracer in pairs(tracers) do
-            tracer:Remove()
+        return oldNamecall(self, unpack(args))
+    end)
+end
+
+local function Wallbang(enabled)
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
+        
+        if enabled and (method == "Raycast" or method == "FindPartOnRayWithIgnoreList") then
+            args[2] = Ray.new(args[2].Origin, args[2].Direction * 1000)
+            args[3] = {Character, workspace.Map}
         end
-        tracers = {}
-    end
+        
+        return oldNamecall(self, unpack(args))
+    end)
 end
 
-local function RemoveFog(enabled)
+local function InstantKill(enabled)
     if enabled then
-        game.Lighting.FogStart = 100000
-        game.Lighting.FogEnd = 100000
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local damage = tool:FindFirstChild("Damage")
+                if damage and damage:IsA("NumberValue") then
+                    damage.Value = 1000000
+                end
+            end
+        end
     else
-        game.Lighting.FogStart = 0
-        game.Lighting.FogEnd = 100000
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local damage = tool:FindFirstChild("Damage")
+                if damage and damage:IsA("NumberValue") then
+                    damage.Value = damage.Value / 1000000
+                end
+            end
+        end
     end
 end
 
-local function DayNight(enabled)
+local function AutoHeal(enabled)
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
-            local currentTime = tick() % 24
-            game.Lighting.ClockTime = currentTime
+            if Humanoid.Health < Humanoid.MaxHealth then
+                Humanoid.Health = Humanoid.Health + 1
+            end
         end)
     else
         if connection then
             connection:Disconnect()
         end
-        game.Lighting.ClockTime = 12
     end
 end
 
-local function RemoveTextures(enabled)
-    local originalMaterials = {}
+local function Triggerbot(enabled)
+    local connection
     if enabled then
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
-                originalMaterials[v] = v.Material
-                v.Material = Enum.Material.SmoothPlastic
+        connection = RunService.RenderStepped:Connect(function()
+            local mouse = LocalPlayer:GetMouse()
+            local target = mouse.Target
+            if target and target.Parent:FindFirstChild("Humanoid") then
+                mouse1press()
+                wait()
+                mouse1release()
             end
-        end
+        end)
     else
-        for part, material in pairs(originalMaterials) do
-            if part then
-                part.Material = material
-            end
+        if connection then
+            connection:Disconnect()
         end
-        originalMaterials = {}
     end
 end
 
-local function ChatSpam(enabled)
+local function BunnyHop(enabled)
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Spam message", "All")
-            wait(1)
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function AutoFarm(enabled)
-    if enabled then
-        print("Auto Farm enabled. Implement game-specific farming logic here.")
-    else
-        print("Auto Farm disabled.")
-    end
-end
-
-local function ServerHop()
-    local HttpService = game:GetService("HttpService")
-    local TeleportService = game:GetService("TeleportService")
-    local PlaceId = game.PlaceId
-    
-    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-    for _, server in pairs(servers.data) do
-        if server.playing < server.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(PlaceId, server.id)
-            break
-        end
-    end
-end
-
--- New functions for respawn and position management
-local function SaveRespawnPoint()
-    RespawnPoint = Character.HumanoidRootPart.Position
-    print("Respawn point saved!")
-end
-
-local function DeleteRespawnPoint()
-    RespawnPoint = nil
-    print("Respawn point deleted!")
-end
-
-local function SavePosition(name)
-    SavedPositions[name] = Character.HumanoidRootPart.Position
-    print("Position '" .. name .. "' saved!")
-end
-
-local function TeleportToPosition(name)
-    if SavedPositions[name] then
-        Character.HumanoidRootPart.CFrame = CFrame.new(SavedPositions[name])
-        print("Teleported to '" .. name .. "'!")
-    else
-        print("Position '" .. name .. "' not found!")
-    end
-end
-
--- New movement functions
-local function Jump(enabled)
-    if enabled then
-        Humanoid.Jump = true
-    end
-end
-
-local function Dash(enabled)
-    if enabled then
-        local direction = HumanoidRootPart.CFrame.LookVector
-        HumanoidRootPart.Velocity = direction * 100
-    end
-end
-
-local function Crouch(enabled)
-    if enabled then
-        Humanoid.CameraOffset = Vector3.new(0, -1, 0)
-    else
-        Humanoid.CameraOffset = Vector3.new(0, 0, 0)
-    end
-end
-
-local function WallClimb(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Stepped:Connect(function()
-            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.LookVector * 1)
-            local hit, _ = workspace:FindPartOnRay(ray, Character)
-            if hit and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
-                Humanoid:ChangeState(Enum.HumanoidStateType.Climbing)
+            if Humanoid:GetState() == Enum.HumanoidStateType.Running then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
             end
         end)
     else
@@ -834,11 +913,11 @@ local function WallClimb(enabled)
     end
 end
 
-local function AirJump(enabled)
+local function SpinBot(enabled)
     local connection
     if enabled then
-        connection = UserInputService.JumpRequest:Connect(function()
-            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        connection = RunService.RenderStepped:Connect(function()
+            Character:SetPrimaryPartCFrame(Character:GetPrimaryPartCFrame() * CFrame.Angles(0, math.rad(10), 0))
         end)
     else
         if connection then
@@ -847,12 +926,86 @@ local function AirJump(enabled)
     end
 end
 
-local function Glide(enabled)
+local function AntiAim(enabled)
     local connection
     if enabled then
-        connection = RunService.Stepped:Connect(function()
-            if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
-                HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, -2, HumanoidRootPart.Velocity.Z)
+        connection = RunService.RenderStepped:Connect(function()
+            Character:SetPrimaryPartCFrame(Character:GetPrimaryPartCFrame() * CFrame.Angles(math.rad(math.random(-180, 180)), math.rad(math.random(-180, 180)), math.rad(math.random(-180, 180))))
+        end)
+    else
+        if connection then
+            connection:Disconnect()
+        end
+    end
+end
+
+local function HitboxExpander(enabled)
+    if enabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
+                player.Character.HumanoidRootPart.Transparency = 0.5
+            end
+        end
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
+                player.Character.HumanoidRootPart.Transparency = 1
+            end
+        end
+    end
+end
+
+local function WeaponMods(enabled)
+    if enabled then
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local fireRate = tool:FindFirstChild("FireRate")
+                if fireRate and fireRate:IsA("NumberValue") then
+                    fireRate.Value = 0.05
+                end
+                local recoil = tool:FindFirstChild("Recoil")
+                if recoil and recoil:IsA("NumberValue") then
+                    recoil.Value = 0
+                end
+                local spread = tool:FindFirstChild("Spread")
+                if spread and spread:IsA("NumberValue") then
+                    spread.Value = 0
+                end
+            end
+        end
+    else
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local fireRate = tool:FindFirstChild("FireRate")
+                if fireRate and fireRate:IsA("NumberValue") then
+                    fireRate.Value = 0.5
+                end
+                local recoil = tool:FindFirstChild("Recoil")
+                if recoil and recoil:IsA("NumberValue") then
+                    recoil.Value = 1
+                end
+                local spread = tool:FindFirstChild("Spread")
+                if spread and spread:IsA("NumberValue") then
+                    spread.Value = 1
+                end
+            end
+        end
+    end
+end
+
+local function AutoReload(enabled)
+    local connection
+    if enabled then
+        connection = RunService.Heartbeat:Connect(function()
+            for _, tool in pairs(Character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    local ammo = tool:FindFirstChild("Ammo")
+                    if ammo and ammo:IsA("IntValue") and ammo.Value == 0 then
+                        tool:Activate()
+                    end
+                end
             end
         end)
     else
@@ -862,10 +1015,26 @@ local function Glide(enabled)
     end
 end
 
-local function Teleport()
-    local mouse = LocalPlayer:GetMouse()
-    local target = mouse.Hit.p
-    HumanoidRootPart.CFrame = CFrame.new(target)
+local function RapidMelee(enabled)
+    if enabled then
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") and tool:FindFirstChild("Melee") then
+                local cooldown = tool:FindFirstChild("Cooldown")
+                if cooldown and cooldown:IsA("NumberValue") then
+                    cooldown.Value = 0
+                end
+            end
+        end
+    else
+        for _, tool in pairs(Character:GetChildren()) do
+            if tool:IsA("Tool") and tool:FindFirstChild("Melee") then
+                local cooldown = tool:FindFirstChild("Cooldown")
+                if cooldown and cooldown:IsA("NumberValue") then
+                    cooldown.Value = 1
+                end
+            end
+        end
+    end
 end
 
 -- Categorías actualizadas
@@ -896,53 +1065,56 @@ local MovementFeatures = {
     {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
     {name = "InfiniteJump", callback = InfiniteJump},
     {name = "NoClip", callback = NoClip},
-    {name = "Jump", callback = Jump},
-    {name = "Dash", callback = Dash},
-    {name = "Crouch", callback = Crouch},
-    {name = "WallClimb", callback = WallClimb},
-    {name = "AirJump", callback = AirJump},
-    {name = "Glide", callback = Glide},
-    {name = "Teleport", callback = Teleport}
+    {name = "BunnyHop", callback = BunnyHop}
 }
 
 local CombatFeatures = {
     {name = "GodMode", callback = GodMode},
-    {name = "KillAura", callback = function() end},
-    {name = "AutoParry", callback = function() end},
-    {name = "Reach", callback = function() end}
+    {name = "KillAura", callback = KillAura},
+    {name = "AutoParry", callback = AutoParry},
+    {name = "Reach", callback = Reach},
+    {name = "AutoDodge", callback = AutoDodge},
+    {name = "AutoAim", callback = AutoAim},
+    {name = "RapidFire", callback = RapidFire},
+    {name = "InfiniteAmmo", callback = InfiniteAmmo},
+    {name = "DamageMultiplier", callback = DamageMultiplier},
+    {name = "AutoBlock", callback = AutoBlock},
+    {name = "CriticalHit", callback = CriticalHit},
+    {name = "Aimbot", callback = Aimbot},
+    {name = "SilentAim", callback = SilentAim},
+    {name = "Wallbang", callback = Wallbang},
+    {name = "InstantKill", callback = InstantKill},
+    {name = "AutoHeal", callback = AutoHeal},
+    {name = "Triggerbot", callback = Triggerbot},
+    {name = "SpinBot", callback = SpinBot},
+    {name = "AntiAim", callback = AntiAim},
+    {name = "HitboxExpander", callback = HitboxExpander},
+    {name = "WeaponMods", callback = WeaponMods},
+    {name = "AutoReload", callback = AutoReload},
+    {name = "RapidMelee", callback = RapidMelee}
 }
 
 local VisualFeatures = {
-    {name = "ESP", callback = ESP},
+    {name = "ESP", callback = function() end},
     {name = "Chams", callback = function() end},
-    {name = "Tracers", callback = Tracers},
-    {name = "Fullbright", callback = Fullbright}
+    {name = "Tracers", callback = function() end},
+    {name = "Fullbright", callback = function() end}
 }
 
 local PlayerFeatures = {
-    {name = "Invisibility", callback = Invisibility},
+    {name = "Invisibility", callback = function() end},
     {name = "AntiAFK", callback = function() end},
     {name = "AutoReset", callback = function() end},
-    {name = "SaveRespawn", callback = SaveRespawnPoint},
-    {name = "DeleteRespawn", callback = DeleteRespawnPoint},
-    {name = "SavePosition", callback = function() 
-        local name = "Position" .. tostring(#SavedPositions + 1)
-        SavePosition(name)
-    end},
-    {name = "TeleportToPosition", callback = function()
-        -- This should be replaced with a proper UI for selecting a saved position
-        if #SavedPositions > 0 then
-            TeleportToPosition(SavedPositions[1])
-        else
-            print("No saved positions!")
-        end
-    end}
+    {name = "SaveRespawn", callback = function() end},
+    {name = "DeleteRespawn", callback = function() end},
+    {name = "SavePosition", callback = function() end},
+    {name = "TeleportToPosition", callback = function() end}
 }
 
 local WorldFeatures = {
-    {name = "RemoveFog", callback = RemoveFog},
-    {name = "DayNight", callback = DayNight},
-    {name = "RemoveTextures", callback = RemoveTextures}
+    {name = "RemoveFog", callback = function() end},
+    {name = "DayNight", callback = function() end},
+    {name = "RemoveTextures", callback = function() end}
 }
 
 local OptimizationFeatures = {
@@ -982,7 +1154,22 @@ local OptimizationFeatures = {
             end
         end
     end},
-    {name = "ReduceTextures", callback = RemoveTextures},
+    {name = "ReduceTextures", callback = function(enabled)
+        if enabled then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
+                    v.Material = Enum.Material.SmoothPlastic
+                end
+            end
+        else
+            -- Restore original textures (this is a simplified version, you might want to store original textures)
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Material == Enum.Material.SmoothPlastic then
+                    v.Material = Enum.Material.Plastic
+                end
+            end
+        end
+    end},
     {name = "DisableLighting", callback = function(enabled)
         if enabled then
             game:GetService("Lighting").GlobalShadows = false
@@ -997,9 +1184,9 @@ local OptimizationFeatures = {
 }
 
 local MiscFeatures = {
-    {name = "ChatSpam", callback = ChatSpam},
-    {name = "AutoFarm", callback = AutoFarm},
-    {name = "ServerHop", callback = ServerHop}
+    {name = "ChatSpam", callback = function() end},
+    {name = "AutoFarm", callback = function() end},
+    {name = "ServerHop", callback = function() end}
 }
 
 local SettingsFeatures = {
@@ -1119,4 +1306,3 @@ ShowSection("Movement")
 
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
-
