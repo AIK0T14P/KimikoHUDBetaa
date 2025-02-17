@@ -172,11 +172,11 @@ ToggleCorner.Parent = ToggleButton
 -- Frame Principal con borde morado y gradiente
 local MainBorder = Instance.new("Frame")
 MainBorder.Name = "MainBorder"
-MainBorder.Size = UDim2.new(0, 800, 0, 600) -- Tamaño aumentado verticalmente
+MainBorder.Size = UDim2.new(0, 800, 0, 600)
 MainBorder.Position = UDim2.new(0.5, -400, 0.5, -300)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
-MainBorder.Visible = true
+MainBorder.Visible = false
 MainBorder.Parent = ScreenGui
 
 -- Añadir gradiente al borde
@@ -1565,7 +1565,9 @@ local Categories = {
 }
 
 -- Crear categorías y secciones
-local Sections = {}
+local Sections =
+
+ {}
 local ActiveCategory = nil
 
 for i, category in ipairs(Categories) do
@@ -1578,9 +1580,7 @@ local MovementFeatures = {
     {name = "Fly", callback = ToggleFly},
     {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
     {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
-    {name = "InfiniteJump", callback = In
-
-finiteJump},
+    {name = "InfiniteJump", callback = InfiniteJump},
     {name = "NoClip", callback = NoClip},
     {name = "BunnyHop", callback = BunnyHop},
     {name = "WallRun", callback = WallRun},
@@ -1591,8 +1591,7 @@ finiteJump},
     {name = "SpeedBoost", callback = SpeedBoost},
     {name = "JumpBoost", callback = JumpBoost},
     {name = "Levitation", callback = Levitation},
-    {name = "Blink", callback = Blink},
-    {name = "Telekinesis", callback = Telekinesis}
+    {name = "Blink", callback = Blink}
 }
 
 local CombatFeatures = {
@@ -1635,7 +1634,8 @@ local PlayerFeatures = {
     {name = "SaveRespawn", callback = function() end},
     {name = "DeleteRespawn", callback = function() end},
     {name = "SavePosition", callback = function() end},
-    {name = "TeleportToPosition", callback = function() end}
+    {name = "TeleportToPosition", callback = function() end},
+    {name = "Telekinesis", callback = Telekinesis}
 }
 
 local WorldFeatures = {
