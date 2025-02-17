@@ -1579,3 +1579,257 @@ local MovementFeatures = {
     {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
     {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
     {name = "InfiniteJump", callback = In
+
+finiteJump},
+    {name = "NoClip", callback = NoClip},
+    {name = "BunnyHop", callback = BunnyHop},
+    {name = "WallRun", callback = WallRun},
+    {name = "DoubleJump", callback = DoubleJump},
+    {name = "AirDash", callback = AirDash},
+    {name = "Slide", callback = Slide},
+    {name = "Grapple", callback = Grapple},
+    {name = "SpeedBoost", callback = SpeedBoost},
+    {name = "JumpBoost", callback = JumpBoost},
+    {name = "Levitation", callback = Levitation},
+    {name = "Blink", callback = Blink},
+    {name = "Telekinesis", callback = Telekinesis}
+}
+
+local CombatFeatures = {
+    {name = "GodMode", callback = GodMode},
+    {name = "KillAura", callback = KillAura},
+    {name = "AutoParry", callback = AutoParry},
+    {name = "Reach", callback = Reach},
+    {name = "AutoDodge", callback = AutoDodge},
+    {name = "AutoAim", callback = AutoAim},
+    {name = "RapidFire", callback = RapidFire},
+    {name = "InfiniteAmmo", callback = InfiniteAmmo},
+    {name = "DamageMultiplier", callback = DamageMultiplier},
+    {name = "AutoBlock", callback = AutoBlock},
+    {name = "CriticalHit", callback = CriticalHit},
+    {name = "Aimbot", callback = Aimbot},
+    {name = "SilentAim", callback = SilentAim},
+    {name = "Wallbang", callback = Wallbang},
+    {name = "InstantKill", callback = InstantKill},
+    {name = "AutoHeal", callback = AutoHeal},
+    {name = "Triggerbot", callback = Triggerbot},
+    {name = "SpinBot", callback = SpinBot},
+    {name = "AntiAim", callback = AntiAim},
+    {name = "HitboxExpander", callback = HitboxExpander},
+    {name = "WeaponMods", callback = WeaponMods},
+    {name = "AutoReload", callback = AutoReload},
+    {name = "RapidMelee", callback = RapidMelee}
+}
+
+local VisualFeatures = {
+    {name = "ESP", callback = ESP},
+    {name = "Chams", callback = Chams},
+    {name = "Tracers", callback = Tracers},
+    {name = "Fullbright", callback = Fullbright}
+}
+
+local PlayerFeatures = {
+    {name = "Invisibility", callback = function() end},
+    {name = "AntiAFK", callback = function() end},
+    {name = "AutoReset", callback = function() end},
+    {name = "SaveRespawn", callback = function() end},
+    {name = "DeleteRespawn", callback = function() end},
+    {name = "SavePosition", callback = function() end},
+    {name = "TeleportToPosition", callback = function() end}
+}
+
+local WorldFeatures = {
+    {name = "RemoveFog", callback = function() end},
+    {name = "DayNight", callback = function() end},
+    {name = "RemoveTextures", callback = function() end}
+}
+
+local OptimizationFeatures = {
+    {name = "LowGraphics", callback = function(enabled)
+        if enabled then
+            settings().Rendering.QualityLevel = 1
+            game:GetService("Lighting").GlobalShadows = false
+            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                    v.Enabled = false
+                end
+            end
+        else
+            settings().Rendering.QualityLevel = 7
+            game:GetService("Lighting").GlobalShadows = true
+            game:GetService("Lighting").Technology = Enum.Technology.Future
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                    v.Enabled = true
+                end
+            end
+        end
+    end},
+    {name = "DisableEffects", callback = function(enabled)
+        if enabled then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") then
+                    v.Enabled = false
+                end
+            end
+        else
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") then
+                    v.Enabled = true
+                end
+            end
+        end
+    end},
+    {name = "ReduceTextures", callback = function(enabled)
+        if enabled then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
+                    v.Material = Enum.Material.SmoothPlastic
+                end
+            end
+        else
+            -- Restore original textures (this is a simplified version, you might want to store original textures)
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Material == Enum.Material.SmoothPlastic then
+                    v.Material = Enum.Material.Plastic
+                end
+            end
+        end
+    end},
+    {name = "DisableLighting", callback = function(enabled)
+        if enabled then
+            game:GetService("Lighting").GlobalShadows = false
+            game:GetService("Lighting").ShadowSoftness = 0
+            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
+        else
+            game:GetService("Lighting").GlobalShadows = true
+            game:GetService("Lighting").ShadowSoftness = 0.5
+            game:GetService("Lighting").Technology = Enum.Technology.Future
+        end
+    end}
+}
+
+local MiscFeatures = {
+    {name = "ChatSpam", callback = function() end},
+    {name = "AutoFarm", callback = function() end},
+    {name = "ServerHop", callback = function() end}
+}
+
+local SettingsFeatures = {
+    {name = "Language", callback = function(enabled)
+        if enabled then
+            CurrentLanguage = "Español"
+        else
+            CurrentLanguage = "English"
+        end
+        Texts = Languages[CurrentLanguage]
+        
+        -- Actualizar textos
+        for name, section in pairs(Sections) do
+            local categoryButton = Sidebar:FindFirstChild(name.."Category")
+            if categoryButton then
+                categoryButton.Text = Texts.categories[name]
+            end
+            
+            for _, child in pairs(section:GetChildren()) do
+                if child:IsA("Frame") then
+                    local label = child:FindFirstChild("TextLabel")
+                    if label and label.Text then
+                        for featureName, translatedName in pairs(Texts.features) do
+                            if label.Text == Languages[CurrentLanguage == "English" and "Español" or "English"].features[featureName] then
+                                label.Text = translatedName
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end}
+}
+
+-- Crear toggles y sliders para cada característica
+for _, feature in ipairs(MovementFeatures) do
+    if feature.slider then
+        CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
+    else
+        CreateToggle(feature.name, Sections.Movement, feature.callback)
+    end
+end
+
+for _, feature in ipairs(CombatFeatures) do
+    CreateToggle(feature.name, Sections.Combat, feature.callback)
+end
+
+for _, feature in ipairs(VisualFeatures) do
+    CreateToggle(feature.name, Sections.Visuals, feature.callback)
+end
+
+for _, feature in ipairs(PlayerFeatures) do
+    CreateToggle(feature.name, Sections.Player, feature.callback)
+end
+
+for _, feature in ipairs(WorldFeatures) do
+    CreateToggle(feature.name, Sections.World, feature.callback)
+end
+
+for _, feature in ipairs(OptimizationFeatures) do
+    CreateToggle(feature.name, Sections.Optimization, feature.callback)
+end
+
+for _, feature in ipairs(MiscFeatures) do
+    CreateToggle(feature.name, Sections.Misc, feature.callback)
+end
+
+for _, feature in ipairs(SettingsFeatures) do
+    CreateToggle(feature.name, Sections.Settings, feature.callback)
+end
+
+-- Manejar la visibilidad de las secciones y mantener el color morado
+local function ShowSection(sectionName)
+    for name, section in pairs(Sections) do
+        section.Visible = (name == sectionName)
+        local button = Sidebar:FindFirstChild(name.."Category")
+        if button then
+            button.BackgroundColor3 = (name == sectionName) and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(45, 45, 45)
+        end
+    end
+    ActiveCategory = sectionName
+end
+
+for _, category in ipairs(Categories) do
+    local button = Sidebar:FindFirstChild(category.name.."Category")
+    if button then
+        button.MouseButton1Click:Connect(function()
+            ShowSection(category.name)
+        end)
+    end
+end
+
+-- Animación del botón de toggle
+ToggleButton.MouseButton1Click:Connect(function()
+    MainBorder.Visible = not MainBorder.Visible
+    local goal = {
+        Rotation = MainBorder.Visible and 180 or 0,
+        Size = MainBorder.Visible and UDim2.new(0, 800, 0, 600) or UDim2.new(0, 0, 0, 0)
+    }
+    TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
+    TweenService:Create(MainBorder, TweenInfo.new(0.3), {Size = goal.Size}):Play()
+end)
+
+-- Manejar el respawn del personaje
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    Humanoid = Character:WaitForChild("Humanoid")
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+end)
+
+-- Eliminar la GUI de carga
+LoadingGui:Destroy()
+
+-- Mostrar la primera sección por defecto
+ShowSection("Movement")
+
+-- Mensaje de confirmación
+print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
