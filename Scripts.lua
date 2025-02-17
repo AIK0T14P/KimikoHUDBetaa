@@ -13,101 +13,99 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local Camera = workspace.CurrentCamera
 
--- New variables for respawn and position management
-local RespawnPoint = nil
-local SavedPositions = {}
+-- Variables para el sistema de arrastre
+local Dragging = false
+local DragStart = nil
+local StartPos = nil
 
--- Sistema de idiomas
+-- Variables para guardado de posiciones
+local SavedPositions = {}
+local RespawnPoint = nil
+
+-- Sistema de idiomas (ahora por defecto en español)
 local Languages = {
-    ["English"] = {
+    ["Español"] = {
         categories = {
-            Movement = "Movement",
-            Combat = "Combat",
-            Visuals = "Visuals",
-            Player = "Player",
-            World = "World",
-            Optimization = "Optimization",
-            Misc = "Misc",
-            Settings = "Settings"
+            Movement = "Movimiento",
+            Combat = "Combate",
+            Visuals = "Visuales",
+            Player = "Jugador",
+            World = "Mundo",
+            Optimization = "Optimización",
+            Misc = "Varios",
+            Settings = "Ajustes"
         },
         features = {
-            Fly = "Fly",
-            Speed = "Speed",
-            SuperJump = "Super Jump",
-            InfiniteJump = "Infinite Jump",
-            NoClip = "No Clip",
-            GodMode = "God Mode",
-            KillAura = "Kill Aura",
-            AutoParry = "Auto Parry",
-            Reach = "Reach",
+            Fly = "Volar",
+            Speed = "Velocidad",
+            SuperJump = "Super Salto",
+            InfiniteJump = "Salto Infinito",
+            NoClip = "Atravesar Paredes",
+            GodMode = "Modo Dios",
+            KillAura = "Aura Asesina",
+            AutoParry = "Auto Bloqueo",
+            Reach = "Alcance",
             ESP = "ESP",
-            Chams = "Chams",
-            Tracers = "Tracers",
-            Fullbright = "Fullbright",
-            Invisibility = "Invisibility",
+            Chams = "Siluetas",
+            Tracers = "Trazadores",
+            Fullbright = "Brillo Total",
+            Invisibility = "Invisibilidad",
             AntiAFK = "Anti AFK",
-            AutoReset = "Auto Reset",
-            RemoveFog = "Remove Fog",
-            DayNight = "Day/Night",
-            RemoveTextures = "Remove Textures",
-            ChatSpam = "Chat Spam",
-            AutoFarm = "Auto Farm",
-            ServerHop = "Server Hop",
-            Language = "Language",
-            LowGraphics = "Low Graphics",
-            DisableEffects = "Disable Effects",
-            ReduceTextures = "Reduce Textures",
-            DisableLighting = "Disable Lighting",
-            SaveRespawn = "Save Respawn",
-            DeleteRespawn = "Delete Respawn",
-            SavePosition = "Save Position",
-            TeleportToPosition = "Teleport to Position",
-            Jump = "Jump",
-            Dash = "Dash",
-            Crouch = "Crouch",
-            WallClimb = "Wall Climb",
-            AirJump = "Air Jump",
-            Glide = "Glide",
-            Teleport = "Teleport",
-            AutoDodge = "Auto Dodge",
-            AutoAim = "Auto Aim",
-            RapidFire = "Rapid Fire",
-            InfiniteAmmo = "Infinite Ammo",
-            DamageMultiplier = "Damage Multiplier",
-            AutoBlock = "Auto Block",
-            CriticalHit = "Critical Hit",
-            Aimbot = "Aimbot",
-            SilentAim = "Silent Aim",
-            Wallbang = "Wallbang",
-            InstantKill = "Instant Kill",
-            AutoHeal = "Auto Heal",
-            Triggerbot = "Triggerbot",
-            BunnyHop = "Bunny Hop",
-            SpinBot = "Spin Bot",
-            AntiAim = "Anti Aim",
-            HitboxExpander = "Hitbox Expander",
-            WeaponMods = "Weapon Mods",
-            AutoReload = "Auto Reload",
-            RapidMelee = "Rapid Melee",
-            WallRun = "Wall Run",
-            DoubleJump = "Double Jump",
-            AirDash = "Air Dash",
-            Slide = "Slide",
-            Grapple = "Grapple",
-            SpeedBoost = "Speed Boost",
-            JumpBoost = "Jump Boost",
-            Levitation = "Levitation",
-            Blink = "Blink",
-            Telekinesis = "Telekinesis"
+            AutoReset = "Auto Reinicio",
+            RemoveFog = "Quitar Niebla",
+            DayNight = "Día/Noche",
+            RemoveTextures = "Quitar Texturas",
+            ChatSpam = "Spam de Chat",
+            AutoFarm = "Auto Farming",
+            ServerHop = "Cambiar Servidor",
+            Language = "Idioma",
+            LowGraphics = "Gráficos Bajos",
+            DisableEffects = "Desactivar Efectos",
+            ReduceTextures = "Reducir Texturas",
+            DisableLighting = "Desactivar Iluminación",
+            SaveRespawn = "Guardar Reaparición",
+            DeleteRespawn = "Borrar Reaparición",
+            SavePosition = "Guardar Posición",
+            TeleportToPosition = "Teletransportar",
+            BunnyHop = "Salto Continuo",
+            WallRun = "Correr en Paredes",
+            DoubleJump = "Doble Salto",
+            AirDash = "Dash Aéreo",
+            Slide = "Deslizar",
+            Grapple = "Gancho",
+            SpeedBoost = "Aumento de Velocidad",
+            JumpBoost = "Aumento de Salto",
+            Levitation = "Levitación",
+            Blink = "Parpadeo",
+            Telekinesis = "Telequinesis",
+            AutoDodge = "Auto Esquivar",
+            AutoAim = "Auto Apuntar",
+            RapidFire = "Disparo Rápido",
+            InfiniteAmmo = "Munición Infinita",
+            DamageMultiplier = "Multiplicador de Daño",
+            AutoBlock = "Auto Bloquear",
+            CriticalHit = "Golpe Crítico",
+            Aimbot = "Apuntado Automático",
+            SilentAim = "Apuntado Silencioso",
+            Wallbang = "Disparar a través de Paredes",
+            InstantKill = "Muerte Instantánea",
+            AutoHeal = "Auto Curación",
+            Triggerbot = "Disparo Automático",
+            SpinBot = "Giro Automático",
+            AntiAim = "Anti Apuntado",
+            HitboxExpander = "Expandir Hitbox",
+            WeaponMods = "Modificaciones de Armas",
+            AutoReload = "Recarga Automática",
+            RapidMelee = "Ataque Cuerpo a Cuerpo Rápido"
         },
-        loading = "Loading..."
+        loading = "Cargando..."
     },
-    ["Español"] = {
-        -- ... (Spanish translations, similar to English but translated)
+    ["English"] = {
+        -- ... (English translations)
     }
 }
 
-local CurrentLanguage = "English"
+local CurrentLanguage = "Español"
 local Texts = Languages[CurrentLanguage]
 
 -- Crear pantalla de carga
@@ -174,9 +172,8 @@ ToggleCorner.Parent = ToggleButton
 -- Frame Principal con borde morado y gradiente
 local MainBorder = Instance.new("Frame")
 MainBorder.Name = "MainBorder"
-MainBorder.Size = UDim2.new(0.8, 0, 0.8, 0)
-MainBorder.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainBorder.AnchorPoint = Vector2.new(0.5, 0.5)
+MainBorder.Size = UDim2.new(0, 800, 0, 600) -- Tamaño aumentado verticalmente
+MainBorder.Position = UDim2.new(0.5, -400, 0.5, -300)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
 MainBorder.Visible = true
@@ -211,7 +208,7 @@ MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
 -- Título "Kimiko HUD Beta"
-local Title = Instance.new("TextLabel")
+local Title = Instance.new("TextButton")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 10)
 Title.BackgroundTransparency = 1
@@ -221,24 +218,61 @@ Title.TextColor3 = Color3.fromRGB(147, 112, 219)
 Title.TextSize = 24
 Title.Parent = MainFrame
 
--- Sidebar
-local Sidebar = Instance.new("Frame")
+-- Sistema de arrastre
+local function UpdateDrag(input)
+    if Dragging then
+        local delta = input.Position - DragStart
+        MainBorder.Position = UDim2.new(
+            StartPos.X.Scale,
+            StartPos.X.Offset + delta.X,
+            StartPos.Y.Scale,
+            StartPos.Y.Offset + delta.Y
+        )
+    end
+end
+
+Title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Dragging = true
+        DragStart = input.Position
+        StartPos = MainBorder.Position
+    end
+end)
+
+Title.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        UpdateDrag(input)
+    end
+end)
+
+Title.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Dragging = false
+    end
+end)
+
+-- Sidebar con scroll
+local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0.25, 0, 1, -50)
+Sidebar.Size = UDim2.new(0.25, 0, 1, -60)
 Sidebar.Position = UDim2.new(0, 0, 0, 50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.1
 Sidebar.BorderSizePixel = 0
+Sidebar.ScrollBarThickness = 4
+Sidebar.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
 Sidebar.Parent = MainFrame
 
--- Contenedor principal
-local ContentFrame = Instance.new("Frame")
+-- Contenedor principal con scroll
+local ContentFrame = Instance.new("ScrollingFrame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(0.75, 0, 1, -50)
+ContentFrame.Size = UDim2.new(0.75, 0, 1, -60)
 ContentFrame.Position = UDim2.new(0.25, 0, 0, 50)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ContentFrame.BackgroundTransparency = 0.1
 ContentFrame.BorderSizePixel = 0
+ContentFrame.ScrollBarThickness = 6
+ContentFrame.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
 ContentFrame.Parent = MainFrame
 
 -- Función para crear categorías en el sidebar
@@ -284,7 +318,7 @@ local function CreateSection(name)
     Section.Position = UDim2.new(0, 20, 0, 10)
     Section.BackgroundTransparency = 1
     Section.BorderSizePixel = 0
-    Section.ScrollBarThickness = 4
+    Section.ScrollBarThickness = 6
     Section.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
     Section.Visible = false
     Section.Parent = ContentFrame
@@ -294,10 +328,15 @@ local function CreateSection(name)
     UIListLayout.Padding = UDim.new(0, 10)
     UIListLayout.Parent = Section
     
+    -- Ajustar el tamaño del contenido automáticamente
+    UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        Section.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+    end)
+    
     return Section
 end
 
--- Función para crear botones de toggle
+-- Función mejorada para crear botones de toggle
 local function CreateToggle(name, section, callback)
     local ToggleFrame = Instance.new("Frame")
     ToggleFrame.Size = UDim2.new(1, 0, 0, 40)
@@ -342,6 +381,7 @@ local function CreateToggle(name, section, callback)
     CircleCorner.Parent = Circle
     
     local Enabled = false
+    local Connection
     
     local function Toggle()
         Enabled = not Enabled
@@ -351,15 +391,39 @@ local function CreateToggle(name, section, callback)
         }
         TweenService:Create(Circle, TweenInfo.new(0.2), {Position = Goal.Position}):Play()
         TweenService:Create(Switch, TweenInfo.new(0.2), {BackgroundColor3 = Goal.BackgroundColor3}):Play()
+        
+        -- Desconectar la conexión anterior si existe
+        if Connection then
+            Connection:Disconnect()
+            Connection = nil
+        end
+        
+        -- Llamar al callback con el nuevo estado
         callback(Enabled)
     end
     
     Switch.MouseButton1Click:Connect(Toggle)
     
-    return Toggle
+    -- Función para obtener el estado actual
+    local function GetState()
+        return Enabled
+    end
+    
+    -- Función para establecer el estado
+    local function SetState(state)
+        if state ~= Enabled then
+            Toggle()
+        end
+    end
+    
+    return {
+        Toggle = Toggle,
+        GetState = GetState,
+        SetState = SetState
+    }
 end
 
--- Función para crear sliders
+-- Función mejorada para crear sliders
 local function CreateSlider(name, section, callback, min, max, default)
     local SliderFrame = Instance.new("Frame")
     SliderFrame.Size = UDim2.new(1, 0, 0, 60)
@@ -1223,6 +1287,271 @@ local function Telekinesis(enabled)
     end
 end
 
+-- Implementación mejorada del ESP
+local function ESP(enabled)
+    local ESPFolder = Instance.new("Folder")
+    ESPFolder.Name = "ESPFolder"
+    ESPFolder.Parent = game.CoreGui
+    
+    local function createESP(player)
+        if player == LocalPlayer then return end
+        
+        local function createBoxHighlight()
+            local highlight = Instance.new("Highlight")
+            highlight.Name = player.Name .. "Highlight"
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineTransparency = 0
+            highlight.Parent = ESPFolder
+            return highlight
+        end
+        
+        local function createNameTag()
+            local billboardGui = Instance.new("BillboardGui")
+            billboardGui.Name = player.Name .. "NameTag"
+            billboardGui.Size = UDim2.new(0, 200, 0, 50)
+            billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+            billboardGui.AlwaysOnTop = true
+            billboardGui.Parent = ESPFolder
+            
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, 0, 0, 20)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.TextColor3 = Color3.new(1, 1, 1)
+            nameLabel.TextStrokeTransparency = 0
+            nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+            nameLabel.Font = Enum.Font.SourceSansBold
+            nameLabel.TextScaled = true
+            nameLabel.Parent = billboardGui
+            
+            return billboardGui, nameLabel
+        end
+        
+        local highlight = createBoxHighlight()
+        local nameTag, nameLabel = createNameTag()
+        
+        local function updateESP()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                highlight.Parent = player.Character
+                nameTag.Parent = player.Character.HumanoidRootPart
+                nameLabel.Text = string.format("%s\n%.1f studs", player.Name,
+                    (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
+            end
+        end
+        
+        local connection = RunService.RenderStepped:Connect(updateESP)
+        
+        player.CharacterAdded:Connect(function(char)
+            highlight.Parent = char
+            nameTag.Parent = char:WaitForChild("HumanoidRootPart")
+        end)
+        
+        return {
+            highlight = highlight,
+            nameTag = nameTag,
+            connection = connection
+        }
+    end
+    
+    local espData = {}
+    
+    if enabled then
+        -- Crear ESP para jugadores existentes
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                espData[player] = createESP(player)
+            end
+        end
+        
+        -- Crear ESP para nuevos jugadores
+        Players.PlayerAdded:Connect(function(player)
+            espData[player] = createESP(player)
+        end)
+        
+        -- Limpiar ESP cuando los jugadores salen
+        Players.PlayerRemoving:Connect(function(player)
+            if espData[player] then
+                espData[player].highlight:Destroy()
+                espData[player].nameTag:Destroy()
+                espData[player].connection:Disconnect()
+                espData[player] = nil
+            end
+        end)
+    else
+        -- Limpiar todo el ESP
+        for player, data in pairs(espData) do
+            data.highlight:Destroy()
+            data.nameTag:Destroy()
+            data.connection:Disconnect()
+            espData[player] = nil
+        end
+        ESPFolder:Destroy()
+    end
+end
+
+-- Función para Chams
+local function Chams(enabled)
+    local ChamsFolder = Instance.new("Folder")
+    ChamsFolder.Name = "ChamsFolder"
+    ChamsFolder.Parent = game.CoreGui
+
+    local function createChams(player)
+        if player == LocalPlayer then return end
+
+        local function applyChams(part)
+            local chamPart = Instance.new("BoxHandleAdornment")
+            chamPart.Name = player.Name .. "Cham"
+            chamPart.Adornee = part
+            chamPart.AlwaysOnTop = true
+            chamPart.ZIndex = 5
+            chamPart.Size = part.Size
+            chamPart.Transparency = 0.5
+            chamPart.Color3 = Color3.new(1, 0, 0)
+            chamPart.Parent = ChamsFolder
+            return chamPart
+        end
+
+        local chams = {}
+        local function updateChams()
+            if player.Character then
+                for _, part in pairs(player.Character:GetChildren()) do
+                    if part:IsA("BasePart") and not chams[part] then
+                        chams[part] = applyChams(part)
+                    end
+                end
+            end
+        end
+
+        local connection = RunService.RenderStepped:Connect(updateChams)
+
+        player.CharacterAdded:Connect(updateChams)
+
+        return {
+            chams = chams,
+            connection = connection
+        }
+    end
+
+    local chamsData = {}
+
+    if enabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                chamsData[player] = createChams(player)
+            end
+        end
+
+        Players.PlayerAdded:Connect(function(player)
+            chamsData[player] = createChams(player)
+        end)
+
+        Players.PlayerRemoving:Connect(function(player)
+            if chamsData[player] then
+                for _, cham in pairs(chamsData[player].chams) do
+                    cham:Destroy()
+                end
+                chamsData[player].connection:Disconnect()
+                chamsData[player] = nil
+            end
+        end)
+    else
+        for player, data in pairs(chamsData) do
+            for _, cham in pairs(data.chams) do
+                cham:Destroy()
+            end
+            data.connection:Disconnect()
+            chamsData[player] = nil
+        end
+        ChamsFolder:Destroy()
+    end
+end
+
+-- Función para Tracers
+local function Tracers(enabled)
+    local TracersFolder = Instance.new("Folder")
+    TracersFolder.Name = "TracersFolder"
+    TracersFolder.Parent = game.CoreGui
+
+    local function createTracer(player)
+        if player == LocalPlayer then return end
+
+        local tracer = Drawing.new("Line")
+        tracer.Visible = false
+        tracer.Color = Color3.new(1, 0, 0)
+        tracer.Thickness = 1
+        tracer.Transparency = 1
+
+        local function updateTracer()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local vector, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
+                if onScreen then
+                    tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                    tracer.To = Vector2.new(vector.X, vector.Y)
+                    tracer.Visible = true
+                else
+                    tracer.Visible = false
+                end
+            else
+                tracer.Visible = false
+            end
+        end
+
+        local connection = RunService.RenderStepped:Connect(updateTracer)
+
+        return {
+            tracer = tracer,
+            connection = connection
+        }
+    end
+
+    local tracersData = {}
+
+    if enabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                tracersData[player] = createTracer(player)
+            end
+        end
+
+        Players.PlayerAdded:Connect(function(player)
+            tracersData[player] = createTracer(player)
+        end)
+
+        Players.PlayerRemoving:Connect(function(player)
+            if tracersData[player] then
+                tracersData[player].tracer:Remove()
+                tracersData[player].connection:Disconnect()
+                tracersData[player] = nil
+            end
+        end)
+    else
+        for player, data in pairs(tracersData) do
+            data.tracer:Remove()
+            data.connection:Disconnect()
+            tracersData[player] = nil
+        end
+        TracersFolder:Destroy()
+    end
+end
+
+-- Función para Fullbright
+local function Fullbright(enabled)
+    if enabled then
+        game:GetService("Lighting").Brightness = 2
+        game:GetService("Lighting").ClockTime = 14
+        game:GetService("Lighting").FogEnd = 100000
+        game:GetService("Lighting").GlobalShadows = false
+        game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    else
+        game:GetService("Lighting").Brightness = 1
+        game:GetService("Lighting").ClockTime = 12
+        game:GetService("Lighting").FogEnd = 10000
+        game:GetService("Lighting").GlobalShadows = true
+        game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -1249,256 +1578,4 @@ local MovementFeatures = {
     {name = "Fly", callback = ToggleFly},
     {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
     {name = "SuperJump", callback = ToggleSuperJump, slider = true, min = 50, max = 500, default = 50},
-    {name = "InfiniteJump", callback = InfiniteJump},
-    {name = "NoClip", callback = NoClip},
-    {name = "BunnyHop", callback = BunnyHop},
-    {name = "WallRun", callback = WallRun},
-    {name = "DoubleJump", callback = DoubleJump},
-    {name = "AirDash", callback = AirDash},
-    {name = "Slide", callback = Slide},
-    {name = "Grapple", callback = Grapple},
-    {name = "SpeedBoost", callback = SpeedBoost},
-    {name = "JumpBoost", callback = JumpBoost},
-    {name = "Levitation", callback = Levitation},
-    {name = "Blink", callback = Blink},
-    {name = "Telekinesis", callback = Telekinesis}
-}
-
-local CombatFeatures = {
-    {name = "GodMode", callback = GodMode},
-    {name = "KillAura", callback = KillAura},
-    {name = "AutoParry", callback = AutoParry},
-    {name = "Reach", callback = Reach},
-    {name = "AutoDodge", callback = AutoDodge},
-    {name = "AutoAim", callback = AutoAim},
-    {name = "RapidFire", callback = RapidFire},
-    {name = "InfiniteAmmo", callback = InfiniteAmmo},
-    {name = "DamageMultiplier", callback = DamageMultiplier},
-    {name = "AutoBlock", callback = AutoBlock},
-    {name = "CriticalHit", callback = CriticalHit},
-    {name = "Aimbot", callback = Aimbot},
-    {name = "SilentAim", callback = SilentAim},
-    {name = "Wallbang", callback = Wallbang},
-    {name = "InstantKill", callback = InstantKill},
-    {name = "AutoHeal", callback = AutoHeal},
-    {name = "Triggerbot", callback = Triggerbot},
-    {name = "SpinBot", callback = SpinBot},
-    {name = "AntiAim", callback = AntiAim},
-    {name = "HitboxExpander", callback = HitboxExpander},
-    {name = "WeaponMods", callback = WeaponMods},
-    {name = "AutoReload", callback = AutoReload},
-    {name = "RapidMelee", callback = RapidMelee}
-}
-
-local VisualFeatures = {
-    {name = "ESP", callback = function() end},
-    {name = "Chams", callback = function() end},
-    {name = "Tracers", callback = function() end},
-    {name = "Fullbright", callback = function() end}
-}
-
-local PlayerFeatures = {
-    {name = "Invisibility", callback = function() end},
-    {name = "AntiAFK", callback = function() end},
-    {name = "AutoReset", callback = function() end},
-    {name = "SaveRespawn", callback = function() end},
-    {name = "DeleteRespawn", callback = function() end},
-    {name = "SavePosition", callback = function() end},
-    {name = "TeleportToPosition", callback = function() end}
-}
-
-local WorldFeatures = {
-    {name = "RemoveFog", callback = function() end},
-    {name = "DayNight", callback = function() end},
-    {name = "RemoveTextures", callback = function() end}
-}
-
-local OptimizationFeatures = {
-    {name = "LowGraphics", callback = function(enabled)
-        if enabled then
-            settings().Rendering.QualityLevel = 1
-            game:GetService("Lighting").GlobalShadows = false
-            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                    v.Enabled = false
-                end
-            end
-        else
-            settings().Rendering.QualityLevel = 7
-            game:GetService("Lighting").GlobalShadows = true
-            game:GetService("Lighting").Technology = Enum.Technology.Future
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                    v.Enabled = true
-                end
-            end
-        end
-    end},
-    {name = "DisableEffects", callback = function(enabled)
-        if enabled then
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") then
-                    v.Enabled = false
-                end
-            end
-        else
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") then
-                    v.Enabled = true
-                end
-            end
-        end
-    end},
-    {name = "ReduceTextures", callback = function(enabled)
-        if enabled then
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
-                    v.Material = Enum.Material.SmoothPlastic
-                end
-            end
-        else
-            -- Restore original textures (this is a simplified version, you might want to store original textures)
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and v.Material == Enum.Material.SmoothPlastic then
-                    v.Material = Enum.Material.Plastic
-                end
-            end
-        end
-    end},
-    {name = "DisableLighting", callback = function(enabled)
-        if enabled then
-            game:GetService("Lighting").GlobalShadows = false
-            game:GetService("Lighting").ShadowSoftness = 0
-            game:GetService("Lighting").Technology = Enum.Technology.Compatibility
-        else
-            game:GetService("Lighting").GlobalShadows = true
-            game:GetService("Lighting").ShadowSoftness = 0.5
-            game:GetService("Lighting").Technology = Enum.Technology.Future
-        end
-    end}
-}
-
-local MiscFeatures = {
-    {name = "ChatSpam", callback = function() end},
-    {name = "AutoFarm", callback = function() end},
-    {name = "ServerHop", callback = function() end}
-}
-
-local SettingsFeatures = {
-    {name = "Language", callback = function(enabled)
-        if enabled then
-            CurrentLanguage = "Español"
-        else
-            CurrentLanguage = "English"
-        end
-        Texts = Languages[CurrentLanguage]
-        
-        -- Actualizar textos
-        for name, section in pairs(Sections) do
-            local categoryButton = Sidebar:FindFirstChild(name.."Category")
-            if categoryButton then
-                categoryButton.Text = Texts.categories[name]
-            end
-            
-            for _, child in pairs(section:GetChildren()) do
-                if child:IsA("Frame") then
-                    local label = child:FindFirstChild("TextLabel")
-                    if label and label.Text then
-                        for featureName, translatedName in pairs(Texts.features) do
-                            if label.Text == Languages[CurrentLanguage == "English" and "Español" or "English"].features[featureName] then
-                                label.Text = translatedName
-                                break
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end}
-}
-
--- Crear toggles y sliders para cada característica
-for _, feature in ipairs(MovementFeatures) do
-    if feature.slider then
-        CreateSlider(feature.name, Sections.Movement, feature.callback, feature.min, feature.max, feature.default)
-    else
-        CreateToggle(feature.name, Sections.Movement, feature.callback)
-    end
-end
-
-for _, feature in ipairs(CombatFeatures) do
-    CreateToggle(feature.name, Sections.Combat, feature.callback)
-end
-
-for _, feature in ipairs(VisualFeatures) do
-    CreateToggle(feature.name, Sections.Visuals, feature.callback)
-end
-
-for _, feature in ipairs(PlayerFeatures) do
-    CreateToggle(feature.name, Sections.Player, feature.callback)
-end
-
-for _, feature in ipairs(WorldFeatures) do
-    CreateToggle(feature.name, Sections.World, feature.callback)
-end
-
-for _, feature in ipairs(OptimizationFeatures) do
-    CreateToggle(feature.name, Sections.Optimization, feature.callback)
-end
-
-for _, feature in ipairs(MiscFeatures) do
-    CreateToggle(feature.name, Sections.Misc, feature.callback)
-end
-
-for _, feature in ipairs(SettingsFeatures) do
-    CreateToggle(feature.name, Sections.Settings, feature.callback)
-end
-
--- Manejar la visibilidad de las secciones y mantener el color morado
-local function ShowSection(sectionName)
-    for name, section in pairs(Sections) do
-        section.Visible = (name == sectionName)
-        local button = Sidebar:FindFirstChild(name.."Category")
-        if button then
-            button.BackgroundColor3 = (name == sectionName) and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(45, 45, 45)
-        end
-    end
-    ActiveCategory = sectionName
-end
-
-for _, category in ipairs(Categories) do
-    local button = Sidebar:FindFirstChild(category.name.."Category")
-    if button then
-        button.MouseButton1Click:Connect(function()
-            ShowSection(category.name)
-        end)
-    end
-end
-
--- Animación del botón de toggle
-ToggleButton.MouseButton1Click:Connect(function()
-    MainBorder.Visible = not MainBorder.Visible
-    local goal = {
-        Rotation = MainBorder.Visible and 180 or 0,
-        Size = MainBorder.Visible and UDim2.new(0.8, 0, 0.8, 0) or UDim2.new(0, 0, 0, 0)
-    }
-    TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
-    TweenService:Create(MainBorder, TweenInfo.new(0.3), {Size = goal.Size}):Play()
-end)
-
--- Manejar el respawn del personaje
-LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-    Character = newCharacter
-    Humanoid = Character:WaitForChild("Humanoid")
-    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-end)
-
--- Eliminar la GUI de carga
-LoadingGui:Destroy()
-
--- Mostrar la primera sección por defecto
-ShowSection("Movement")
-
--- Mensaje de confirmación
-print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+    {name = "InfiniteJump", callback = In
