@@ -1590,6 +1590,10 @@ for i, category in ipairs(Categories) do
     Sections[category.name] = CreateSection(category.name)
 end
 
+-- Características
+
+
+
 -- Características actualizadas
 local MovementFeatures = {
     {name = "Fly", callback = ToggleFly},
