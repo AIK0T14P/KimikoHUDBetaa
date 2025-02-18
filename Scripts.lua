@@ -157,13 +157,14 @@ ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Botón para mostrar/ocultar
 local ToggleButton = Instance.new("ImageButton")
-ToggleButton.Size = UDim2.new(0, 40, 0, 40)
-ToggleButton.Position = UDim2.new(0, 10, 0.5, -20)
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Position = UDim2.new(1, -60, 0, 10)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
 ToggleButton.Image = "rbxassetid://3926305904"
 ToggleButton.ImageRectOffset = Vector2.new(764, 244)
 ToggleButton.ImageRectSize = Vector2.new(36, 36)
 ToggleButton.Parent = ScreenGui
+ToggleButton.ZIndex = 100
 
 local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(1, 0)
@@ -172,12 +173,13 @@ ToggleCorner.Parent = ToggleButton
 -- Frame Principal con borde morado y gradiente
 local MainBorder = Instance.new("Frame")
 MainBorder.Name = "MainBorder"
-MainBorder.Size = UDim2.new(0, 800, 0, 600)
-MainBorder.Position = UDim2.new(0.5, -400, 0.5, -300)
+MainBorder.Size = UDim2.new(0, 600, 0, 400)
+MainBorder.Position = UDim2.new(0.5, -300, 0.5, -200)
 MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
 MainBorder.BorderSizePixel = 0
 MainBorder.Visible = false
 MainBorder.Parent = ScreenGui
+MainBorder.ZIndex = 10
 
 -- Añadir gradiente al borde
 local UIGradient = Instance.new("UIGradient")
@@ -202,6 +204,7 @@ MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BackgroundTransparency = 0.1
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = MainBorder
+MainFrame.ZIndex = 11
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
@@ -217,6 +220,7 @@ Title.Text = "Kimiko HUD Beta"
 Title.TextColor3 = Color3.fromRGB(147, 112, 219)
 Title.TextSize = 24
 Title.Parent = MainFrame
+Title.ZIndex = 12
 
 -- Sistema de arrastre
 local function UpdateDrag(input)
@@ -262,6 +266,7 @@ Sidebar.BorderSizePixel = 0
 Sidebar.ScrollBarThickness = 4
 Sidebar.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
 Sidebar.Parent = MainFrame
+Sidebar.ZIndex = 12
 
 -- Contenedor principal con scroll
 local ContentFrame = Instance.new("ScrollingFrame")
@@ -274,6 +279,7 @@ ContentFrame.BorderSizePixel = 0
 ContentFrame.ScrollBarThickness = 6
 ContentFrame.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
 ContentFrame.Parent = MainFrame
+ContentFrame.ZIndex = 12
 
 -- Función para crear categorías en el sidebar
 local function CreateCategory(name, icon, position)
@@ -286,6 +292,7 @@ local function CreateCategory(name, icon, position)
     CategoryButton.Font = Enum.Font.GothamSemibold
     CategoryButton.TextSize = 14
     CategoryButton.Parent = Sidebar
+    CategoryButton.ZIndex = 13
     
     local IconImage = Instance.new("ImageLabel")
     IconImage.Size = UDim2.new(0, 20, 0, 20)
@@ -293,6 +300,7 @@ local function CreateCategory(name, icon, position)
     IconImage.BackgroundTransparency = 1
     IconImage.Image = icon
     IconImage.Parent = CategoryButton
+    IconImage.ZIndex = 14
     
     CategoryButton.Text = Texts.categories[name]
     CategoryButton.TextXAlignment = Enum.TextXAlignment.Left
@@ -322,6 +330,7 @@ local function CreateSection(name)
     Section.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
     Section.Visible = false
     Section.Parent = ContentFrame
+    Section.ZIndex = 13
     
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -342,6 +351,7 @@ local function CreateToggle(name, section, callback)
     ToggleFrame.Size = UDim2.new(1, 0, 0, 40)
     ToggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     ToggleFrame.Parent = section
+    ToggleFrame.ZIndex = 14
     
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
@@ -357,6 +367,7 @@ local function CreateToggle(name, section, callback)
     Label.TextSize = 14
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = ToggleFrame
+    Label.ZIndex = 15
     
     local Switch = Instance.new("TextButton")
     Switch.Size = UDim2.new(0, 40, 0, 20)
@@ -365,6 +376,7 @@ local function CreateToggle(name, section, callback)
     Switch.BorderSizePixel = 0
     Switch.Text = ""
     Switch.Parent = ToggleFrame
+    Switch.ZIndex = 15
     
     local SwitchCorner = Instance.new("UICorner")
     SwitchCorner.CornerRadius = UDim.new(1, 0)
@@ -375,6 +387,7 @@ local function CreateToggle(name, section, callback)
     Circle.Position = UDim2.new(0, 2, 0.5, -8)
     Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Circle.Parent = Switch
+    Circle.ZIndex = 16
     
     local CircleCorner = Instance.new("UICorner")
     CircleCorner.CornerRadius = UDim.new(1, 0)
@@ -429,6 +442,7 @@ local function CreateSlider(name, section, callback, min, max, default)
     SliderFrame.Size = UDim2.new(1, 0, 0, 60)
     SliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     SliderFrame.Parent = section
+    SliderFrame.ZIndex = 14
     
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
@@ -444,6 +458,7 @@ local function CreateSlider(name, section, callback, min, max, default)
     Label.TextSize = 14
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = SliderFrame
+    Label.ZIndex = 15
     
     local SliderBar = Instance.new("TextButton")
     SliderBar.Name = "SliderBar"
@@ -454,6 +469,7 @@ local function CreateSlider(name, section, callback, min, max, default)
     SliderBar.AutoButtonColor = false
     SliderBar.Text = ""
     SliderBar.Parent = SliderFrame
+    SliderBar.ZIndex = 15
     
     local SliderCorner = Instance.new("UICorner")
     SliderCorner.CornerRadius = UDim.new(1, 0)
@@ -464,6 +480,7 @@ local function CreateSlider(name, section, callback, min, max, default)
     SliderFill.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
     SliderFill.BorderSizePixel = 0
     SliderFill.Parent = SliderBar
+    SliderFill.ZIndex = 16
     
     local SliderFillCorner = Instance.new("UICorner")
     SliderFillCorner.CornerRadius = UDim.new(1, 0)
@@ -1565,9 +1582,7 @@ local Categories = {
 }
 
 -- Crear categorías y secciones
-local Sections =
-
- {}
+local Sections = {}
 local ActiveCategory = nil
 
 for i, category in ipairs(Categories) do
