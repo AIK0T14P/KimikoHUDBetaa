@@ -4,7 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
-local DataStoreService = game:GetService("DataStoreService")
+local DataStoreService = DataStoreService:GetDataStore("AccessSystem")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -105,62 +105,36 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "EnhancedGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 DebugPrint("ScreenGui creado")
 
 -- Botón para mostrar/ocultar
-local ToggleButton = Instance.new("ImageButton")
-ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Position = UDim2.new(1, -60, 0, 10)
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 100, 0, 50)
+ToggleButton.Position = UDim2.new(1, -110, 0, 10)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
-ToggleButton.Image = "rbxassetid://3926305904"
-ToggleButton.ImageRectOffset = Vector2.new(764, 244)
-ToggleButton.ImageRectSize = Vector2.new(36, 36)
+ToggleButton.Text = "Mostrar Menu"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 14
 ToggleButton.Parent = ScreenGui
-ToggleButton.ZIndex = 100
 
 local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.CornerRadius = UDim.new(0, 10)
 ToggleCorner.Parent = ToggleButton
 
 DebugPrint("Botón de toggle creado")
 
--- Frame Principal con borde morado y gradiente
-local MainBorder = Instance.new("Frame")
-MainBorder.Name = "MainBorder"
-MainBorder.Size = UDim2.new(0, 600, 0, 400)
-MainBorder.Position = UDim2.new(0.5, -300, 0.5, -200)
-MainBorder.BackgroundColor3 = Color3.fromRGB(157, 122, 229)
-MainBorder.BorderSizePixel = 0
-MainBorder.Visible = false
-MainBorder.Parent = ScreenGui
-MainBorder.ZIndex = 10
-
--- Añadir gradiente al borde
-local UIGradient = Instance.new("UIGradient")
-UIGradient.Rotation = 90
-UIGradient.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0),
-    NumberSequenceKeypoint.new(0.8, 0),
-    NumberSequenceKeypoint.new(1, 1)
-})
-UIGradient.Parent = MainBorder
-
-local MainBorderCorner = Instance.new("UICorner")
-MainBorderCorner.CornerRadius = UDim.new(0, 12)
-MainBorderCorner.Parent = MainBorder
-
 -- Frame Principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(1, -4, 1, -4)
-MainFrame.Position = UDim2.new(0, 2, 0, 2)
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.BackgroundTransparency = 0.1
 MainFrame.BorderSizePixel = 0
-MainFrame.Parent = MainBorder
-MainFrame.ZIndex = 11
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
@@ -169,7 +143,7 @@ MainCorner.Parent = MainFrame
 DebugPrint("MainFrame creado")
 
 -- Título "Kimiko HUD Beta"
-local Title = Instance.new("TextButton")
+local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 10)
 Title.BackgroundTransparency = 1
@@ -178,160 +152,34 @@ Title.Text = "Kimiko HUD Beta"
 Title.TextColor3 = Color3.fromRGB(147, 112, 219)
 Title.TextSize = 24
 Title.Parent = MainFrame
-Title.ZIndex = 12
 
 DebugPrint("Título creado")
 
--- Sistema de arrastre
-local Dragging = false
-local DragStart = nil
-local StartPos = nil
+-- Función para mostrar/ocultar el menú
+local function ToggleMenu()
+    MainFrame.Visible = not MainFrame.Visible
+    ToggleButton.Text = MainFrame.Visible and "Ocultar Menu" or "Mostrar Menu"
+    DebugPrint("Menu toggled. Visibility: " .. tostring(MainFrame.Visible))
+end
 
-local function UpdateDrag(input)
-    if Dragging then
-        local delta = input.Position - DragStart
-        MainBorder.Position = UDim2.new(
-            StartPos.X.Scale,
-            StartPos.X.Offset + delta.X,
-            StartPos.Y.Scale,
-            StartPos.Y.Offset + delta.Y
-        )
+ToggleButton.MouseButton1Click:Connect(ToggleMenu)
+
+-- Mensaje de confirmación
+DebugPrint("Script cargado correctamente. Use el botón en la esquina superior derecha para mostrar/ocultar el menú.")
+
+-- Función para verificar si el script se está ejecutando
+local function CheckExecution()
+    if ScreenGui.Parent then
+        DebugPrint("El script se está ejecutando correctamente.")
+    else
+        DebugPrint("El ScreenGui no está presente en el PlayerGui. El script puede no estar ejecutándose correctamente.")
     end
 end
 
-Title.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = true
-        DragStart = input.Position
-        StartPos = MainBorder.Position
-    end
-end)
-
-Title.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        UpdateDrag(input)
-    end
-end)
-
-Title.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = false
-    end
-end)
-
--- Sidebar con scroll
-local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0.25, 0, 1, -60)
-Sidebar.Position = UDim2.new(0, 0, 0, 50)
-Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Sidebar.BackgroundTransparency = 0.1
-Sidebar.BorderSizePixel = 0
-Sidebar.ScrollBarThickness = 4
-Sidebar.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
-Sidebar.Parent = MainFrame
-Sidebar.ZIndex = 12
-
--- Contenedor principal con scroll
-local ContentFrame = Instance.new("ScrollingFrame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(0.75, 0, 1, -60)
-ContentFrame.Position = UDim2.new(0.25, 0, 0, 50)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-ContentFrame.BackgroundTransparency = 0.1
-ContentFrame.BorderSizePixel = 0
-ContentFrame.ScrollBarThickness = 6
-ContentFrame.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
-ContentFrame.Parent = MainFrame
-ContentFrame.ZIndex = 12
-
--- Función para crear categorías en el sidebar
-local function CreateCategory(name, icon, position)
-    local CategoryButton = Instance.new("TextButton")
-    CategoryButton.Name = name.."Category"
-    CategoryButton.Size = UDim2.new(1, -20, 0, 40)
-    CategoryButton.Position = UDim2.new(0, 10, 0, position)
-    CategoryButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    CategoryButton.BorderSizePixel = 0
-    CategoryButton.Font = Enum.Font.GothamSemibold
-    CategoryButton.TextSize = 14
-    CategoryButton.Parent = Sidebar
-    CategoryButton.ZIndex = 13
-    
-    local IconImage = Instance.new("ImageLabel")
-    IconImage.Size = UDim2.new(0, 20, 0, 20)
-    IconImage.Position = UDim2.new(0, 2, 0.5, -10)
-    IconImage.BackgroundTransparency = 1
-    IconImage.Image = icon
-    IconImage.Parent = CategoryButton
-    IconImage.ZIndex = 14
-    
-    CategoryButton.Text = name
-    CategoryButton.TextXAlignment = Enum.TextXAlignment.Left
-    CategoryButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CategoryButton.AutoButtonColor = false
-    
-    local TextPadding = Instance.new("UIPadding")
-    TextPadding.PaddingLeft = UDim.new(0, 25)
-    TextPadding.Parent = CategoryButton
-    
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = CategoryButton
-    
-    return CategoryButton
+-- Verificar la ejecución después de un breve retraso
+wait(1)
+CheckExecution()
 end
-
--- Función para crear secciones de contenido
-local function CreateSection(name)
-    local Section = Instance.new("ScrollingFrame")
-    Section.Name = name.."Section"
-    Section.Size = UDim2.new(1, -40, 1, -20)
-    Section.Position = UDim2.new(0, 20, 0, 10)
-    Section.BackgroundTransparency = 1
-    Section.BorderSizePixel = 0
-    Section.ScrollBarThickness = 6
-    Section.ScrollBarImageColor3 = Color3.fromRGB(147, 112, 219)
-    Section.Visible = false
-    Section.Parent = ContentFrame
-    Section.ZIndex = 13
-    
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 10)
-    UIListLayout.Parent = Section
-    
-    -- Ajustar el tamaño del contenido automáticamente
-    UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        Section.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
-    end)
-    
-    return Section
-end
-
--- Categorías actualizadas
-local Categories = {
-    {name = "Movement", icon = "rbxassetid://3926307971"},
-    {name = "Combat", icon = "rbxassetid://3926307971"},
-    {name = "Visuals", icon = "rbxassetid://3926307971"},
-    {name = "Player", icon = "rbxassetid://3926307971"},
-    {name = "World", icon = "rbxassetid://3926307971"},
-    {name = "Optimization", icon = "rbxassetid://3926307971"},
-    {name = "Misc", icon = "rbxassetid://3926307971"},
-    {name = "Settings", icon = "rbxassetid://3926307971"},
-    {name = "Access", icon = "rbxassetid://3926307971"}  -- Categoría para el sistema de acceso
-}
-
--- Crear categorías y secciones
-local Sections = {}
-local ActiveCategory = nil
-
-for i, category in ipairs(Categories) do
-    local button = CreateCategory(category.name, category.icon, (i-1) * 50)
-    Sections[category.name] = CreateSection(category.name)
-end
-
-DebugPrint("Categorías y secciones creadas")
 
 -- Función para crear la sección de acceso
 local function CreateAccessSection()
@@ -348,8 +196,6 @@ local function CreateAccessSection()
     local DurationInput = Instance.new("TextBox")
     DurationInput.Size = UDim2.new(1, -20, 0, 30)
     DurationInput.Position = UDim2.new(0, 10, 0, 50)
-    DurationInput.PlaceholderText = "Duración en horas"
-    DurationInput.Parent = Access10,0,50)
     DurationInput.PlaceholderText = "Duración en horas"
     DurationInput.Parent = AccessSection
     
