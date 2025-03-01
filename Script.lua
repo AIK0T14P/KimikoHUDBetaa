@@ -13,10 +13,12 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local Camera = workspace.CurrentCamera
 
--- Variables para el sistema de arrastre
-local Dragging = false
-local DragStart = nil
-local StartPos = nil
+-- Debugging
+local function DebugPrint(message)
+    print("[DEBUG] " .. message)
+end
+
+DebugPrint("Script iniciado")
 
 -- Sistema de acceso por tiempo
 local AccessSystem = {
@@ -85,7 +87,7 @@ function AccessSystem:GetRemainingTime(username)
 end
 
 -- Función para formatear el tiempo en días, horas, minutos y segundos
-function FormatTime(seconds)
+local function FormatTime(seconds)
     local days = math.floor(seconds / 86400)
     local hours = math.floor((seconds % 86400) / 3600)
     local minutes = math.floor((seconds % 3600) / 60)
@@ -96,12 +98,16 @@ end
 -- Cargar datos de acceso al inicio
 AccessSystem:LoadData()
 
+DebugPrint("Datos de acceso cargados")
+
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "EnhancedGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+DebugPrint("ScreenGui creado")
 
 -- Botón para mostrar/ocultar
 local ToggleButton = Instance.new("ImageButton")
@@ -117,6 +123,8 @@ ToggleButton.ZIndex = 100
 local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleButton
+
+DebugPrint("Botón de toggle creado")
 
 -- Frame Principal con borde morado y gradiente
 local MainBorder = Instance.new("Frame")
@@ -158,6 +166,8 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
+DebugPrint("MainFrame creado")
+
 -- Título "Kimiko HUD Beta"
 local Title = Instance.new("TextButton")
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -170,7 +180,13 @@ Title.TextSize = 24
 Title.Parent = MainFrame
 Title.ZIndex = 12
 
+DebugPrint("Título creado")
+
 -- Sistema de arrastre
+local Dragging = false
+local DragStart = nil
+local StartPos = nil
+
 local function UpdateDrag(input)
     if Dragging then
         local delta = input.Position - DragStart
@@ -315,6 +331,8 @@ for i, category in ipairs(Categories) do
     Sections[category.name] = CreateSection(category.name)
 end
 
+DebugPrint("Categorías y secciones creadas")
+
 -- Función para crear la sección de acceso
 local function CreateAccessSection()
     local AccessSection = Sections.Access
@@ -331,16 +349,14 @@ local function CreateAccessSection()
     DurationInput.Size = UDim2.new(1, -20, 0, 30)
     DurationInput.Position = UDim2.new(0, 10, 0, 50)
     DurationInput.PlaceholderText = "Duración en horas"
+    DurationInput.Parent = Access10,0,50)
+    DurationInput.PlaceholderText = "Duración en horas"
     DurationInput.Parent = AccessSection
     
     -- Botón para agregar acceso
     local AddButton = Instance.new("TextButton")
     AddButton.Size = UDim2.new(1, -20, 0, 30)
     AddButton.Position = UDim2.new(0, 10, 0, 90)
-    AddButton.Text = "Agregar acceso"
-    AddButton.Parent = AccessSection
-    
-    -- Contenedor para10,0,90)
     AddButton.Text = "Agregar acceso"
     AddButton.Parent = AccessSection
     
@@ -458,6 +474,8 @@ end
 
 -- Crear la sección de acceso
 CreateAccessSection()
+
+DebugPrint("Sección de acceso creada")
 
 -- Función para mostrar/ocultar la sección de acceso según el usuario
 local function UpdateAccessVisibility()
@@ -594,5 +612,5 @@ end)
 CheckAccess()
 
 -- Mensaje de confirmación
-print("Script mejorado cargado correctamente. Use el botón en la esquina superior derecha para mostrar/ocultar el menú.")
+DebugPrint("Script cargado correctamente. Use el botón en la esquina superior derecha para mostrar/ocultar el menú.")
 
