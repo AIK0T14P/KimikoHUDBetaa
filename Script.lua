@@ -4,8 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local HttpService = game:GetService("HttpService")
+local DataStoreService = game:GetService("DataStoreService")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -19,43 +18,51 @@ local Dragging = false
 local DragStart = nil
 local StartPos = nil
 
--- Variables para guardado de posiciones
-local SavedPositions = {}
-local RespawnPoint = nil
-
 -- Sistema de acceso por tiempo
 local AccessSystem = {
     AdminUser = "AIK0T14",
     Users = {},
-    SaveFileName = "AccessSystem.json"
+    DataStore = DataStoreService:GetDataStore("AccessSystem")
 }
 
--- Función para guardar los datos de acceso
+-- Función para guardar los datos de acceso en la nube
 function AccessSystem:SaveData()
-    local data = HttpService:JSONEncode(self.Users)
-    writefile(self.SaveFileName, data)
+    local success, error = pcall(function()
+        self.DataStore:SetAsync("Users", self.Users)
+    end)
+    if not success then
+        warn("Error al guardar datos: " .. tostring(error))
+    end
 end
 
--- Función para cargar los datos de acceso
+-- Función para cargar los datos de acceso desde la nube
 function AccessSystem:LoadData()
-    if isfile(self.SaveFileName) then
-        local data = readfile(self.SaveFileName)
-        self.Users = HttpService:JSONDecode(data)
+    local success, result = pcall(function()
+        return self.DataStore:GetAsync("Users")
+    end)
+    if success and result then
+        self.Users = result
+    else
+        warn("Error al cargar datos: " .. tostring(result))
     end
 end
 
 -- Función para agregar o modificar el acceso de un usuario
-function AccessSystem:SetAccess(username, duration)
+function AccessSystem:SetAccess(username, hours)
+    local seconds = hours * 3600
     self.Users[username] = {
-        EndTime = os.time() + duration
+        EndTime = os.time() + seconds,
+        TotalTime = seconds
     }
     self:SaveData()
+    self:UpdateAccessDisplay()
 end
 
 -- Función para eliminar el acceso de un usuario
 function AccessSystem:RemoveAccess(username)
     self.Users[username] = nil
     self:SaveData()
+    self:UpdateAccessDisplay()
 end
 
 -- Función para verificar si un usuario tiene acceso
@@ -75,6 +82,15 @@ function AccessSystem:GetRemainingTime(username)
         return remainingTime > 0 and remainingTime or 0
     end
     return 0
+end
+
+-- Función para formatear el tiempo en días, horas, minutos y segundos
+function FormatTime(seconds)
+    local days = math.floor(seconds / 86400)
+    local hours = math.floor((seconds % 86400) / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local secs = seconds % 60
+    return string.format("%dd %02dh %02dm %02ds", days, hours, minutes, secs)
 end
 
 -- Cargar datos de acceso al inicio
@@ -277,178 +293,6 @@ local function CreateSection(name)
     return Section
 end
 
--- Función para crear botones de toggle
-local function CreateToggle(name, section, callback)
-    local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(1, 0, 0, 40)
-    ToggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    ToggleFrame.Parent = section
-    ToggleFrame.ZIndex = 14
-    
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = ToggleFrame
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -60, 1, 0)
-    Label.Position = UDim2.new(0, 10, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Font = Enum.Font.GothamSemibold
-    Label.Text = name
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 14
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ToggleFrame
-    Label.ZIndex = 15
-    
-    local Switch = Instance.new("TextButton")
-    Switch.Size = UDim2.new(0, 40, 0, 20)
-    Switch.Position = UDim2.new(1, -50, 0.5, -10)
-    Switch.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    Switch.BorderSizePixel = 0
-    Switch.Text = ""
-    Switch.Parent = ToggleFrame
-    Switch.ZIndex = 15
-    
-    local SwitchCorner = Instance.new("UICorner")
-    SwitchCorner.CornerRadius = UDim.new(1, 0)
-    SwitchCorner.Parent = Switch
-    
-    local Circle = Instance.new("Frame")
-    Circle.Size = UDim2.new(0, 16, 0, 16)
-    Circle.Position = UDim2.new(0, 2, 0.5, -8)
-    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Circle.Parent = Switch
-    Circle.ZIndex = 16
-    
-    local CircleCorner = Instance.new("UICorner")
-    CircleCorner.CornerRadius = UDim.new(1, 0)
-    CircleCorner.Parent = Circle
-    
-    local Enabled = false
-    local Connection
-    
-    local function Toggle()
-        Enabled = not Enabled
-        local Goal = {
-            BackgroundColor3 = Enabled and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(60, 60, 60),
-            Position = Enabled and UDim2.new(0, 22, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-        }
-        TweenService:Create(Circle, TweenInfo.new(0.2), {Position = Goal.Position}):Play()
-        TweenService:Create(Switch, TweenInfo.new(0.2), {BackgroundColor3 = Goal.BackgroundColor3}):Play()
-        
-        if Connection then
-            Connection:Disconnect()
-            Connection = nil
-        end
-        
-        callback(Enabled)
-    end
-    
-    Switch.MouseButton1Click:Connect(Toggle)
-    
-    local function GetState()
-        return Enabled
-    end
-    
-    local function SetState(state)
-        if state ~= Enabled then
-            Toggle()
-        end
-    end
-    
-    return {
-        Toggle = Toggle,
-        GetState = GetState,
-        SetState = SetState
-    }
-end
-
--- Función para crear sliders
-local function CreateSlider(name, section, callback, min, max, default)
-    local SliderFrame = Instance.new("Frame")
-    SliderFrame.Size = UDim2.new(1, 0, 0, 60)
-    SliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    SliderFrame.Parent = section
-    SliderFrame.ZIndex = 14
-    
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = SliderFrame
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -20, 0, 20)
-    Label.Position = UDim2.new(0, 10, 0, 5)
-    Label.BackgroundTransparency = 1
-    Label.Font = Enum.Font.GothamSemibold
-    Label.Text = name .. ": " .. default
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 14
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = SliderFrame
-    Label.ZIndex = 15
-    
-    local SliderBar = Instance.new("TextButton")
-    SliderBar.Name = "SliderBar"
-    SliderBar.Size = UDim2.new(1, -20, 0, 20)
-    SliderBar.Position = UDim2.new(0, 10, 0, 30)
-    SliderBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    SliderBar.BorderSizePixel = 0
-    SliderBar.AutoButtonColor = false
-    SliderBar.Text = ""
-    SliderBar.Parent = SliderFrame
-    SliderBar.ZIndex = 15
-    
-    local SliderCorner = Instance.new("UICorner")
-    SliderCorner.CornerRadius = UDim.new(1, 0)
-    SliderCorner.Parent = SliderBar
-    
-    local SliderFill = Instance.new("Frame")
-    SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-    SliderFill.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
-    SliderFill.BorderSizePixel = 0
-    SliderFill.Parent = SliderBar
-    SliderFill.ZIndex = 16
-    
-    local SliderFillCorner = Instance.new("UICorner")
-    SliderFillCorner.CornerRadius = UDim.new(1, 0)
-    SliderFillCorner.Parent = SliderFill
-    
-    local Value = default
-    local Dragging = false
-    
-    local function UpdateSlider(input)
-        local sizeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-        Value = math.floor(min + ((max - min) * sizeX))
-        SliderFill.Size = UDim2.new(sizeX, 0, 1, 0)
-        Label.Text = name .. ": " .. Value
-        callback(Value)
-    end
-    
-    SliderBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            Dragging = true
-            UpdateSlider(input)
-        end
-    end)
-    
-    SliderBar.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            Dragging = false
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateSlider(input)
-        end
-    end)
-    
-    return function()
-        return Value
-    end
-end
-
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -459,7 +303,7 @@ local Categories = {
     {name = "Optimization", icon = "rbxassetid://3926307971"},
     {name = "Misc", icon = "rbxassetid://3926307971"},
     {name = "Settings", icon = "rbxassetid://3926307971"},
-    {name = "Access", icon = "rbxassetid://3926307971"}  -- Nueva categoría para el sistema de acceso
+    {name = "Access", icon = "rbxassetid://3926307971"}  -- Categoría para el sistema de acceso
 }
 
 -- Crear categorías y secciones
@@ -482,11 +326,11 @@ local function CreateAccessSection()
     UsernameInput.PlaceholderText = "Nombre de usuario"
     UsernameInput.Parent = AccessSection
     
-    -- Input para la duración del acceso
+    -- Input para la duración del acceso en horas
     local DurationInput = Instance.new("TextBox")
     DurationInput.Size = UDim2.new(1, -20, 0, 30)
     DurationInput.Position = UDim2.new(0, 10, 0, 50)
-    DurationInput.PlaceholderText = "Duración en segundos"
+    DurationInput.PlaceholderText = "Duración en horas"
     DurationInput.Parent = AccessSection
     
     -- Botón para agregar acceso
@@ -496,27 +340,118 @@ local function CreateAccessSection()
     AddButton.Text = "Agregar acceso"
     AddButton.Parent = AccessSection
     
+    -- Contenedor para10,0,90)
+    AddButton.Text = "Agregar acceso"
+    AddButton.Parent = AccessSection
+    
+    -- Contenedor para la lista de usuarios con acceso
+    local UserListContainer = Instance.new("ScrollingFrame")
+    UserListContainer.Size = UDim2.new(1, -20, 0, 200)
+    UserListContainer.Position = UDim2.new(0, 10, 0, 130)
+    UserListContainer.BackgroundTransparency = 1
+    UserListContainer.ScrollBarThickness = 6
+    UserListContainer.Parent = AccessSection
+    
+    local UserListLayout = Instance.new("UIListLayout")
+    UserListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UserListLayout.Padding = UDim.new(0, 10)
+    UserListLayout.Parent = UserListContainer
+    
+    -- Función para actualizar la lista de usuarios con acceso
+    function AccessSystem:UpdateAccessDisplay()
+        -- Limpiar la lista actual
+        for _, child in pairs(UserListContainer:GetChildren()) do
+            if child:IsA("Frame") then
+                child:Destroy()
+            end
+        end
+        
+        -- Agregar cada usuario a la lista
+        for username, userData in pairs(self.Users) do
+            local UserFrame = Instance.new("Frame")
+            UserFrame.Size = UDim2.new(1, 0, 0, 60)
+            UserFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            UserFrame.Parent = UserListContainer
+            
+            local UserAvatar = Instance.new("ImageLabel")
+            UserAvatar.Size = UDim2.new(0, 50, 0, 50)
+            UserAvatar.Position = UDim2.new(0, 5, 0, 5)
+            UserAvatar.BackgroundTransparency = 1
+            UserAvatar.Image = Players:GetUserThumbnailAsync(Players:GetUserIdFromNameAsync(username), Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size50x50)
+            UserAvatar.Parent = UserFrame
+            
+            local UserNameLabel = Instance.new("TextLabel")
+            UserNameLabel.Size = UDim2.new(0.5, -60, 0, 25)
+            UserNameLabel.Position = UDim2.new(0, 60, 0, 5)
+            UserNameLabel.BackgroundTransparency = 1
+            UserNameLabel.Font = Enum.Font.GothamSemibold
+            UserNameLabel.Text = username
+            UserNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            UserNameLabel.TextSize = 14
+            UserNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            UserNameLabel.Parent = UserFrame
+            
+            local TimeRemainingLabel = Instance.new("TextLabel")
+            TimeRemainingLabel.Size = UDim2.new(0.5, -60, 0, 25)
+            TimeRemainingLabel.Position = UDim2.new(0, 60, 0, 30)
+            TimeRemainingLabel.BackgroundTransparency = 1
+            TimeRemainingLabel.Font = Enum.Font.Gotham
+            TimeRemainingLabel.Text = "Tiempo restante: " .. FormatTime(self:GetRemainingTime(username))
+            TimeRemainingLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+            TimeRemainingLabel.TextSize = 12
+            TimeRemainingLabel.TextXAlignment = Enum.TextXAlignment.Left
+            TimeRemainingLabel.Parent = UserFrame
+            
+            local ModifyButton = Instance.new("TextButton")
+            ModifyButton.Size = UDim2.new(0, 60, 0, 25)
+            ModifyButton.Position = UDim2.new(1, -130, 0, 5)
+            ModifyButton.BackgroundColor3 = Color3.fromRGB(70, 70, 200)
+            ModifyButton.Text = "Modificar"
+            ModifyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            ModifyButton.TextSize = 12
+            ModifyButton.Parent = UserFrame
+            
+            local DeleteButton = Instance.new("TextButton")
+            DeleteButton.Size = UDim2.new(0, 60, 0, 25)
+            DeleteButton.Position = UDim2.new(1, -65, 0, 5)
+            DeleteButton.BackgroundColor3 = Color3.fromRGB(200, 70, 70)
+            DeleteButton.Text = "Eliminar"
+            DeleteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            DeleteButton.TextSize = 12
+            DeleteButton.Parent = UserFrame
+            
+            ModifyButton.MouseButton1Click:Connect(function()
+                UsernameInput.Text = username
+                DurationInput.Text = tostring(math.floor(self:GetRemainingTime(username) / 3600))
+            end)
+            
+            DeleteButton.MouseButton1Click:Connect(function()
+                self:RemoveAccess(username)
+            end)
+        end
+        
+        -- Ajustar el tamaño del contenedor
+        UserListContainer.CanvasSize = UDim2.new(0, 0, 0, UserListLayout.AbsoluteContentSize.Y)
+    end
+    
     AddButton.MouseButton1Click:Connect(function()
         local username = UsernameInput.Text
         local duration = tonumber(DurationInput.Text)
-        if username ~= "" and duration then
+        if username ~= "" and duration and duration > 0 then
             AccessSystem:SetAccess(username, duration)
-            print("Acceso agregado para " .. username .. " por " .. duration .. " segundos.")
-        end
-    end)
-    
-    -- Botón para eliminar acceso
-    local RemoveButton = Instance.new("TextButton")
-    RemoveButton.Size = UDim2.new(1, -20, 0, 30)
-    RemoveButton.Position = UDim2.new(0, 10, 0, 130)
-    RemoveButton.Text = "Eliminar acceso"
-    RemoveButton.Parent = AccessSection
-    
-    RemoveButton.MouseButton1Click:Connect(function()
-        local username = UsernameInput.Text
-        if username ~= "" then
-            AccessSystem:RemoveAccess(username)
-            print("Acceso eliminado para " .. username)
+            UsernameInput.Text = ""
+            DurationInput.Text = ""
+            -- Mostrar mensaje de confirmación
+            local ConfirmationLabel = Instance.new("TextLabel")
+            ConfirmationLabel.Size = UDim2.new(1, -20, 0, 30)
+            ConfirmationLabel.Position = UDim2.new(0, 10, 0, 340)
+            ConfirmationLabel.BackgroundTransparency = 1
+            ConfirmationLabel.Font = Enum.Font.GothamBold
+            ConfirmationLabel.Text = "Acceso agregado/modificado para " .. username
+            ConfirmationLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+            ConfirmationLabel.TextSize = 14
+            ConfirmationLabel.Parent = AccessSection
+            game.Debris:AddItem(ConfirmationLabel, 3)  -- El mensaje desaparecerá después de 3 segundos
         end
     end)
 end
@@ -596,7 +531,7 @@ AccessTimeLabel.Parent = AccessTimeFrame
 local function UpdateAccessTimeDisplay()
     local remainingTime = AccessSystem:GetRemainingTime(LocalPlayer.Name)
     if remainingTime > 0 then
-        AccessTimeLabel.Text = "Tiempo restante: " .. math.floor(remainingTime / 60) .. "m " .. remainingTime % 60 .. "s"
+        AccessTimeLabel.Text = "Tiempo restante: " .. FormatTime(remainingTime)
         AccessTimeFrame.Visible = true
     else
         AccessTimeFrame.Visible = false
@@ -607,6 +542,9 @@ end
 spawn(function()
     while wait(1) do
         UpdateAccessTimeDisplay()
+        if LocalPlayer.Name == AccessSystem.AdminUser then
+            AccessSystem:UpdateAccessDisplay()
+        end
     end
 end)
 
