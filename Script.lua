@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
+local Teams = game:GetService("Teams")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -239,7 +240,7 @@ Title.ZIndex = 12
 -- Botón de redimensionamiento (mejorado)
 local ResizeButton = Instance.new("TextButton")
 ResizeButton.Size = UDim2.new(0, 30, 0, 30)
-ResizeButton.Position = UDim2.new(1, -35, 0, 5)
+ResizeButton.Position = UDim2.new(1, -35, 1, -35)
 ResizeButton.BackgroundTransparency = 0.5
 ResizeButton.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
 ResizeButton.Text = "⤡"
@@ -350,8 +351,8 @@ local function UpdateResize(input)
         -- Actualizar tamaño del borde
         MainBorder.Size = UDim2.new(0, newWidth, 0, newHeight)
         
-        -- Mantener la posición en lugar de centrar (más intuitivo)
-        -- No modificamos la posición para que el redimensionamiento sea desde la esquina
+        -- Actualizar posición del botón de redimensionamiento
+        ResizeButton.Position = UDim2.new(1, -35, 1, -35)
     end
 end
 
@@ -1064,12 +1065,20 @@ local function Telekinesis(enabled)
     end
 end
 
--- Implementación mejorada del ESP
+-- Implementación mejorada del ESP con colores de equipo
+-- Continuación de la implementación del ESP
 local function ESP(enabled)
     EnabledFeatures["ESP"] = enabled
     local ESPFolder = Instance.new("Folder")
     ESPFolder.Name = "ESPFolder"
     ESPFolder.Parent = game.CoreGui
+    
+    local function getTeamColor(player)
+        if player.Team then
+            return player.Team.TeamColor.Color
+        end
+        return Color3.fromRGB(255, 0, 0) -- Color por defecto si no tiene equipo
+    end
     
     local function createESP(player)
         if player == LocalPlayer then return end
@@ -1077,7 +1086,7 @@ local function ESP(enabled)
         local function createBoxHighlight()
             local highlight = Instance.new("Highlight")
             highlight.Name = player.Name .. "Highlight"
-            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.FillColor = getTeamColor(player)
             highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
             highlight.FillTransparency = 0.5
             highlight.OutlineTransparency = 0
@@ -1096,7 +1105,7 @@ local function ESP(enabled)
             local nameLabel = Instance.new("TextLabel")
             nameLabel.Size = UDim2.new(1, 0, 0, 20)
             nameLabel.BackgroundTransparency = 1
-            nameLabel.TextColor3 = Color3.new(1, 1, 1)
+            nameLabel.TextColor3 = getTeamColor(player)
             nameLabel.TextStrokeTransparency = 0
             nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
             nameLabel.Font = Enum.Font.SourceSansBold
@@ -1115,6 +1124,8 @@ local function ESP(enabled)
                 nameTag.Parent = player.Character.HumanoidRootPart
                 nameLabel.Text = string.format("%s\n%.1f studs", player.Name,
                     (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
+                highlight.FillColor = getTeamColor(player)
+                nameLabel.TextColor3 = getTeamColor(player)
             end
         end
         
@@ -1170,6 +1181,7 @@ end
 
 -- Función para Chams
 local function Chams(enabled)
+    EnabledFeatures["Chams"] = enabled
     local ChamsFolder = Instance.new("Folder")
     ChamsFolder.Name = "ChamsFolder"
     ChamsFolder.Parent = game.CoreGui
@@ -1185,7 +1197,7 @@ local function Chams(enabled)
             chamPart.ZIndex = 5
             chamPart.Size = part.Size
             chamPart.Transparency = 0.5
-            chamPart.Color3 = Color3.new(1, 0, 0)
+            chamPart.Color3 = player.Team and player.Team.TeamColor.Color or Color3.new(1, 0, 0)
             chamPart.Parent = ChamsFolder
             return chamPart
         end
@@ -1247,6 +1259,7 @@ end
 
 -- Función para Tracers
 local function Tracers(enabled)
+    EnabledFeatures["Tracers"] = enabled
     local TracersFolder = Instance.new("Folder")
     TracersFolder.Name = "TracersFolder"
     TracersFolder.Parent = game.CoreGui
@@ -1256,7 +1269,7 @@ local function Tracers(enabled)
 
         local tracer = Drawing.new("Line")
         tracer.Visible = false
-        tracer.Color = Color3.new(1, 0, 0)
+        tracer.Color = player.Team and player.Team.TeamColor.Color or Color3.new(1, 0, 0)
         tracer.Thickness = 1
         tracer.Transparency = 1
 
@@ -1315,6 +1328,7 @@ end
 
 -- Función para Fullbright
 local function Fullbright(enabled)
+    EnabledFeatures["Fullbright"] = enabled
     if enabled then
         game:GetService("Lighting").Brightness = 2
         game:GetService("Lighting").ClockTime = 14
@@ -1621,4 +1635,3 @@ UITransparency(10)
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
 print("Ahora puede arrastrar el botón de toggle a cualquier posición, redimensionar el menú y ajustar la transparencia.")
-
