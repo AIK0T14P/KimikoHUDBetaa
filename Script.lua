@@ -236,17 +236,22 @@ Title.TextSize = 24
 Title.Parent = MainFrame
 Title.ZIndex = 12
 
--- Botón de redimensionamiento
+-- Botón de redimensionamiento (mejorado)
 local ResizeButton = Instance.new("TextButton")
 ResizeButton.Size = UDim2.new(0, 30, 0, 30)
 ResizeButton.Position = UDim2.new(1, -35, 0, 5)
-ResizeButton.BackgroundTransparency = 1
+ResizeButton.BackgroundTransparency = 0.5
+ResizeButton.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
 ResizeButton.Text = "⤡"
-ResizeButton.TextColor3 = Color3.fromRGB(147, 112, 219)
+ResizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ResizeButton.TextSize = 24
 ResizeButton.Font = Enum.Font.SourceSansBold
 ResizeButton.Parent = MainFrame
 ResizeButton.ZIndex = 12
+
+local ResizeCorner = Instance.new("UICorner")
+ResizeCorner.CornerRadius = UDim.new(0, 6)
+ResizeCorner.Parent = ResizeButton
 
 -- Sistema de arrastre para el botón de toggle
 local function UpdateToggleDrag(input)
@@ -335,7 +340,7 @@ Title.InputEnded:Connect(function(input)
     end
 end)
 
--- Sistema de redimensionamiento
+-- Sistema de redimensionamiento mejorado
 local function UpdateResize(input)
     if Resizing then
         local delta = input.Position - ResizeStart
@@ -345,16 +350,8 @@ local function UpdateResize(input)
         -- Actualizar tamaño del borde
         MainBorder.Size = UDim2.new(0, newWidth, 0, newHeight)
         
-        -- Actualizar posición para mantener el centro
-        local centerX = StartPos.X.Offset + StartSize.X.Offset / 2
-        local centerY = StartPos.Y.Offset + StartSize.Y.Offset / 2
-        
-        MainBorder.Position = UDim2.new(
-            0,
-            centerX - newWidth / 2,
-            0,
-            centerY - newHeight / 2
-        )
+        -- Mantener la posición en lugar de centrar (más intuitivo)
+        -- No modificamos la posición para que el redimensionamiento sea desde la esquina
     end
 end
 
@@ -922,8 +919,11 @@ local function AntiAim(enabled)
     end
 end
 
+-- Función mejorada de HitboxExpander para que persista cuando los jugadores mueren y reaparecen
 local function HitboxExpander(enabled)
     EnabledFeatures["HitboxExpander"] = enabled
+    
+    -- Función para expandir el hitbox de un jugador
     local function expandHitbox(player)
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             player.Character.HumanoidRootPart.Size = enabled and Vector3.new(10, 10, 10) or Vector3.new(2, 2, 1)
@@ -931,20 +931,78 @@ local function HitboxExpander(enabled)
         end
     end
     
+    -- Aplicar a todos los jugadores actuales
     for _, player in pairs(Players:GetPlayers()) do
         expandHitbox(player)
     end
     
-    local connection
+    -- Conexiones para mantener el hitbox expandido
+    local playerAddedConnection
+    local playerRemovingConnection
+    local characterAddedConnections = {}
+    
     if enabled then
-        connection = Players.PlayerAdded:Connect(function(player)
-            player.CharacterAdded:Connect(function()
+        -- Cuando se activa, configurar todas las conexiones necesarias
+        
+        -- Para jugadores nuevos que se unen
+        playerAddedConnection = Players.PlayerAdded:Connect(function(player)
+            -- Cuando un jugador se une, configurar la conexión para cuando su personaje aparezca
+            characterAddedConnections[player] = player.CharacterAdded:Connect(function(character)
+                task.wait(0.5) -- Pequeña espera para asegurar que el HumanoidRootPart esté cargado
                 expandHitbox(player)
             end)
         end)
+        
+        -- Para jugadores existentes cuando reaparecen
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                characterAddedConnections[player] = player.CharacterAdded:Connect(function(character)
+                    task.wait(0.5)
+                    expandHitbox(player)
+                end)
+            end
+        end
+        
+        -- Limpiar conexiones cuando un jugador se va
+        playerRemovingConnection = Players.PlayerRemoving:Connect(function(player)
+            if characterAddedConnections[player] then
+                characterAddedConnections[player]:Disconnect()
+                characterAddedConnections[player] = nil
+            end
+        end)
+        
+        -- Ejecutar periódicamente para asegurar que todos los hitboxes estén expandidos
+        spawn(function()
+            while EnabledFeatures["HitboxExpander"] do
+                for _, player in pairs(Players:GetPlayers()) do
+                    expandHitbox(player)
+                end
+                task.wait(1) -- Verificar cada segundo
+            end
+        end)
     else
-        if connection then
+        -- Cuando se desactiva, limpiar todas las conexiones
+        if playerAddedConnection then
+            playerAddedConnection:Disconnect()
+            playerAddedConnection = nil
+        end
+        
+        if playerRemovingConnection then
+            playerRemovingConnection:Disconnect()
+            playerRemovingConnection = nil
+        end
+        
+        for player, connection in pairs(characterAddedConnections) do
             connection:Disconnect()
+            characterAddedConnections[player] = nil
+        end
+        
+        -- Restaurar hitboxes normales
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
+                player.Character.HumanoidRootPart.Transparency = 1
+            end
         end
     end
 end
@@ -1272,15 +1330,18 @@ local function Fullbright(enabled)
     end
 end
 
--- Función para controlar la transparencia de la interfaz
+-- Función mejorada para controlar la transparencia de la interfaz
 local function UITransparency(value)
     -- Convertir el valor (0-100) a transparencia (0-1)
     local transparency = value / 100
     
-    -- Aplicar transparencia a todos los elementos de la interfaz
+    -- Aplicar transparencia a todos los elementos de la interfaz excepto el borde principal
     MainFrame.BackgroundTransparency = transparency
     Sidebar.BackgroundTransparency = transparency
     ContentFrame.BackgroundTransparency = transparency
+    
+    -- Mantener el borde principal visible (no transparente)
+    MainBorder.BackgroundTransparency = 0
     
     -- Aplicar a todos los elementos dentro de las secciones
     for _, section in pairs(Sections) do
@@ -1534,6 +1595,18 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
     Humanoid = Character:WaitForChild("Humanoid")
     HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    
+    -- Reactivar funciones habilitadas después del respawn
+    for feature, enabled in pairs(EnabledFeatures) do
+        if enabled and feature == "HitboxExpander" then
+            -- No necesitamos hacer nada aquí, ya que HitboxExpander ahora persiste automáticamente
+        elseif enabled and feature == "Speed" then
+            Humanoid.WalkSpeed = enabled
+        elseif enabled and feature == "SuperJump" then
+            Humanoid.JumpPower = enabled
+            Humanoid.JumpHeight = 7.2
+        end
+    end
 end)
 
 -- Eliminar la GUI de carga
@@ -1548,3 +1621,4 @@ UITransparency(10)
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
 print("Ahora puede arrastrar el botón de toggle a cualquier posición, redimensionar el menú y ajustar la transparencia.")
+
