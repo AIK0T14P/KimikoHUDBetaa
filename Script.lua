@@ -18,6 +18,16 @@ local Dragging = false
 local DragStart = nil
 local StartPos = nil
 
+-- Variables para el botón de toggle
+local ToggleDragging = false
+local ToggleDragStart = nil
+local ToggleStartPos = nil
+
+-- Variables para el redimensionamiento
+local Resizing = false
+local ResizeStart = nil
+local StartSize = nil
+
 -- Variables para guardado de posiciones
 local SavedPositions = {}
 local RespawnPoint = nil
@@ -96,7 +106,8 @@ local Languages = {
             HitboxExpander = "Expandir Hitbox",
             WeaponMods = "Modificaciones de Armas",
             AutoReload = "Recarga Automática",
-            RapidMelee = "Ataque Cuerpo a Cuerpo Rápido"
+            RapidMelee = "Ataque Cuerpo a Cuerpo Rápido",
+            UITransparency = "Transparencia de Interfaz"
         },
         loading = "Cargando..."
     },
@@ -155,7 +166,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Botón para mostrar/ocultar
+-- Botón para mostrar/ocultar (ahora con arrastre)
 local ToggleButton = Instance.new("ImageButton")
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
 ToggleButton.Position = UDim2.new(1, -60, 0, 10)
@@ -212,7 +223,7 @@ MainCorner.Parent = MainFrame
 
 -- Título "Kimiko HUD Beta"
 local Title = Instance.new("TextButton")
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, -50, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 10)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
@@ -222,7 +233,73 @@ Title.TextSize = 24
 Title.Parent = MainFrame
 Title.ZIndex = 12
 
--- Sistema de arrastre
+-- Botón de redimensionamiento
+local ResizeButton = Instance.new("TextButton")
+ResizeButton.Size = UDim2.new(0, 30, 0, 30)
+ResizeButton.Position = UDim2.new(1, -35, 0, 5)
+ResizeButton.BackgroundTransparency = 1
+ResizeButton.Text = "⤡"
+ResizeButton.TextColor3 = Color3.fromRGB(147, 112, 219)
+ResizeButton.TextSize = 24
+ResizeButton.Font = Enum.Font.SourceSansBold
+ResizeButton.Parent = MainFrame
+ResizeButton.ZIndex = 12
+
+-- Sistema de arrastre para el botón de toggle
+local function UpdateToggleDrag(input)
+    if ToggleDragging then
+        local delta = input.Position - ToggleDragStart
+        ToggleButton.Position = UDim2.new(
+            ToggleStartPos.X.Scale,
+            ToggleStartPos.X.Offset + delta.X,
+            ToggleStartPos.Y.Scale,
+            ToggleStartPos.Y.Offset + delta.Y
+        )
+    end
+end
+
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        -- Iniciar un temporizador para determinar si es un clic o un arrastre
+        local startTime = tick()
+        local startPosition = input.Position
+        
+        ToggleDragging = false
+        ToggleDragStart = input.Position
+        ToggleStartPos = ToggleButton.Position
+        
+        local connection
+        connection = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                connection:Disconnect()
+                
+                -- Si el tiempo es corto y la posición no cambió mucho, es un clic
+                if tick() - startTime < 0.3 and (input.Position - startPosition).Magnitude < 5 then
+                    -- Acción de clic: mostrar/ocultar el menú
+                    MainBorder.Visible = not MainBorder.Visible
+                    local goal = {
+                        Rotation = MainBorder.Visible and 180 or 0
+                    }
+                    TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
+                end
+                
+                ToggleDragging = false
+            elseif (input.Position - startPosition).Magnitude > 5 then
+                -- Si el movimiento es significativo, es un arrastre
+                ToggleDragging = true
+                UpdateToggleDrag(input)
+            end
+        end)
+    end
+end)
+
+ToggleButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        UpdateToggleDrag(input)
+    end
+end)
+
+-- Sistema de arrastre para el menú principal
 local function UpdateDrag(input)
     if Dragging then
         local delta = input.Position - DragStart
@@ -252,6 +329,50 @@ end)
 Title.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Dragging = false
+    end
+end)
+
+-- Sistema de redimensionamiento
+local function UpdateResize(input)
+    if Resizing then
+        local delta = input.Position - ResizeStart
+        local newWidth = math.max(300, StartSize.X.Offset + delta.X)
+        local newHeight = math.max(200, StartSize.Y.Offset + delta.Y)
+        
+        -- Actualizar tamaño del borde
+        MainBorder.Size = UDim2.new(0, newWidth, 0, newHeight)
+        
+        -- Actualizar posición para mantener el centro
+        local centerX = StartPos.X.Offset + StartSize.X.Offset / 2
+        local centerY = StartPos.Y.Offset + StartSize.Y.Offset / 2
+        
+        MainBorder.Position = UDim2.new(
+            0,
+            centerX - newWidth / 2,
+            0,
+            centerY - newHeight / 2
+        )
+    end
+end
+
+ResizeButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Resizing = true
+        ResizeStart = input.Position
+        StartSize = MainBorder.Size
+        StartPos = MainBorder.Position
+    end
+end)
+
+ResizeButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        UpdateResize(input)
+    end
+end)
+
+ResizeButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Resizing = false
     end
 end)
 
@@ -1120,6 +1241,26 @@ local function Fullbright(enabled)
     end
 end
 
+-- Función para controlar la transparencia de la interfaz
+local function UITransparency(value)
+    -- Convertir el valor (0-100) a transparencia (0-1)
+    local transparency = value / 100
+    
+    -- Aplicar transparencia a todos los elementos de la interfaz
+    MainFrame.BackgroundTransparency = transparency
+    Sidebar.BackgroundTransparency = transparency
+    ContentFrame.BackgroundTransparency = transparency
+    
+    -- Aplicar a todos los elementos dentro de las secciones
+    for _, section in pairs(Sections) do
+        for _, child in pairs(section:GetChildren()) do
+            if child:IsA("Frame") then
+                child.BackgroundTransparency = transparency
+            end
+        end
+    end
+end
+
 -- Categorías actualizadas
 local Categories = {
     {name = "Movement", icon = "rbxassetid://3926307971"},
@@ -1291,7 +1432,8 @@ local SettingsFeatures = {
                 end
             end
         end
-    end}
+    end},
+    {name = "UITransparency", callback = UITransparency, slider = true, min = 0, max = 90, default = 10}
 }
 
 -- Crear toggles y sliders para cada característica
@@ -1328,7 +1470,11 @@ for _, feature in ipairs(MiscFeatures) do
 end
 
 for _, feature in ipairs(SettingsFeatures) do
-    CreateToggle(feature.name, Sections.Settings, feature.callback)
+    if feature.slider then
+        CreateSlider(feature.name, Sections.Settings, feature.callback, feature.min, feature.max, feature.default)
+    else
+        CreateToggle(feature.name, Sections.Settings, feature.callback)
+    end
 end
 
 -- Manejar la visibilidad de las secciones y mantener el color morado
@@ -1352,17 +1498,6 @@ for _, category in ipairs(Categories) do
     end
 end
 
--- Animación del botón de toggle
-ToggleButton.MouseButton1Click:Connect(function()
-    MainBorder.Visible = not MainBorder.Visible
-    local goal = {
-        Rotation = MainBorder.Visible and 180 or 0,
-        Size = MainBorder.Visible and UDim2.new(0, 800, 0, 600) or UDim2.new(0, 0, 0, 0)
-    }
-    TweenService:Create(ToggleButton, TweenInfo.new(0.3), {Rotation = goal.Rotation}):Play()
-    TweenService:Create(MainBorder, TweenInfo.new(0.3), {Size = goal.Size}):Play()
-end)
-
 -- Manejar el respawn del personaje
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
@@ -1376,5 +1511,9 @@ LoadingGui:Destroy()
 -- Mostrar la primera sección por defecto
 ShowSection("Movement")
 
+-- Aplicar transparencia inicial
+UITransparency(10)
+
 -- Mensaje de confirmación
 print("Script mejorado cargado correctamente. Use el botón en la izquierda para mostrar/ocultar el menú.")
+print("Ahora puede arrastrar el botón de toggle a cualquier posición, redimensionar el menú y ajustar la transparencia.")
