@@ -610,69 +610,6 @@ local function NoClip(enabled)
     end
 end
 
-local function GodMode(enabled)
-    if enabled then
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        Character.Parent = game.ReplicatedStorage
-        
-        local function onDied()
-            Character.Parent = workspace
-            local clone = workspace:FindFirstChild(Character.Name)
-            if clone then clone:Destroy() end
-        end
-        
-        clone.Humanoid.Died:Connect(onDied)
-    else
-        Character.Parent = workspace
-        local clone = workspace:FindFirstChild(Character.Name)
-        if clone then clone:Destroy() end
-    end
-end
-
-local function KillAura(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Heartbeat:Connect(function()
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
-                    if distance <= 10 then
-                        local args = {
-                            [1] = player.Character.Humanoid
-                        }
-                        game:GetService("ReplicatedStorage").RemoteEvents.DamageEvent:FireServer(unpack(args))
-                    end
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function AutoParry(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Heartbeat:Connect(function()
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
-                    if distance <= 15 then
-                        game:GetService("ReplicatedStorage").RemoteEvents.ParryEvent:FireServer()
-                    end
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
 local function Reach(enabled)
     if enabled then
         for _, tool in pairs(Character:GetChildren()) do
@@ -745,48 +682,6 @@ local function AutoAim(enabled)
     end
 end
 
-local function RapidFire(enabled)
-    if enabled then
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                local fireRate = tool:FindFirstChild("FireRate")
-                if fireRate and fireRate:IsA("NumberValue") then
-                    fireRate.Value = 0.05
-                end
-            end
-        end
-    else
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                local fireRate = tool:FindFirstChild("FireRate")
-                if fireRate and fireRate:IsA("NumberValue") then
-                    fireRate.Value = 0.5
-                end
-            end
-        end
-    end
-end
-
-local function InfiniteAmmo(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Stepped:Connect(function()
-            for _, tool in pairs(Character:GetChildren()) do
-                if tool:IsA("Tool") then
-                    local ammo = tool:FindFirstChild("Ammo")
-                    if ammo and ammo:IsA("IntValue") then
-                        ammo.Value = 999
-                    end
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
 local function DamageMultiplier(enabled)
     if enabled then
         for _, tool in pairs(Character:GetChildren()) do
@@ -807,128 +702,6 @@ local function DamageMultiplier(enabled)
             end
         end
     end
-end
-
-local function AutoBlock(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Heartbeat:Connect(function()
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
-                    if distance <= 10 then
-                        game:GetService("ReplicatedStorage").RemoteEvents.BlockEvent:FireServer(true)
-                    else
-                        game:GetService("ReplicatedStorage").RemoteEvents.BlockEvent:FireServer(false)
-                    end
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-        game:GetService("ReplicatedStorage").RemoteEvents.BlockEvent:FireServer(false)
-    end
-end
-
-local function CriticalHit(enabled)
-    if enabled then
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                local critChance = Instance.new("NumberValue")
-                critChance.Name = "CriticalChance"
-                critChance.Value = 100
-                critChance.Parent = tool
-            end
-        end
-    else
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                local critChance = tool:FindFirstChild("CriticalChance")
-                if critChance then
-                    critChance:Destroy()
-                end
-            end
-        end
-    end
-end
-
-local function Aimbot(enabled)
-    local connection
-    if enabled then
-        connection = RunService.RenderStepped:Connect(function()
-            local closestPlayer = nil
-            local closestDistance = math.huge
-            local mousePosition = UserInputService:GetMouseLocation()
-
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local screenPosition, onScreen = Camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
-                    if onScreen then
-                        local distance = (Vector2.new(mousePosition.X, mousePosition.Y) - Vector2.new(screenPosition.X, screenPosition.Y)).Magnitude
-                        if distance < closestDistance then
-                            closestPlayer = player
-                            closestDistance = distance
-                        end
-                    end
-                end
-            end
-
-            if closestPlayer then
-                local aimPart = closestPlayer.Character.HumanoidRootPart
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPart.Position)
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function SilentAim(enabled)
-    local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local args = {...}
-        local method = getnamecallmethod()
-        
-        if enabled and (method == "FireServer" or method == "InvokeServer") and self.Name == "RemoteEvents" then
-            local closestPlayer = nil
-            local closestDistance = math.huge
-            
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
-                    if distance < closestDistance then
-                        closestPlayer = player
-                        closestDistance = distance
-                    end
-                end
-            end
-            
-            if closestPlayer and args[1] == "FireWeapon" then
-                args[2] = closestPlayer.Character.HumanoidRootPart.Position
-            end
-        end
-        
-        return oldNamecall(self, unpack(args))
-    end)
-end
-
-local function Wallbang(enabled)
-    local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local args = {...}
-        local method = getnamecallmethod()
-        
-        if enabled and (method == "Raycast" or method == "FindPartOnRayWithIgnoreList") then
-            args[2] = Ray.new(args[2].Origin, args[2].Direction * 1000)
-            args[3] = {Character, workspace.Map}
-        end
-        
-        return oldNamecall(self, unpack(args))
-    end)
 end
 
 local function InstantKill(enabled)
@@ -959,25 +732,6 @@ local function AutoHeal(enabled)
         connection = RunService.Heartbeat:Connect(function()
             if Humanoid.Health < Humanoid.MaxHealth then
                 Humanoid.Health = Humanoid.Health + 1
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function Triggerbot(enabled)
-    local connection
-    if enabled then
-        connection = RunService.RenderStepped:Connect(function()
-            local mouse = LocalPlayer:GetMouse()
-            local target = mouse.Target
-            if target and target.Parent:FindFirstChild("Humanoid") then
-                mouse1press()
-                wait()
-                mouse1release()
             end
         end)
     else
@@ -1046,214 +800,11 @@ local function HitboxExpander(enabled)
     end
 end
 
-local function WeaponMods(enabled)
-    if enabled then
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                local fireRate = tool:FindFirstChild("FireRate")
-                if fireRate and fireRate:IsA("NumberValue") then
-                    fireRate.Value = 0.05
-                end
-                local recoil = tool:FindFirstChild("Recoil")
-                if recoil and recoil:IsA("NumberValue") then
-                    recoil.Value = 0
-                end
-                local spread = tool:FindFirstChild("Spread")
-                if spread and spread:IsA("NumberValue") then
-                    spread.Value = 0
-                end
-            end
-        end
-    else
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                local fireRate = tool:FindFirstChild("FireRate")
-                if fireRate and fireRate:IsA("NumberValue") then
-                    fireRate.Value = 0.5
-                end
-                local recoil = tool:FindFirstChild("Recoil")
-                if recoil and recoil:IsA("NumberValue") then
-                    recoil.Value = 1
-                end
-                local spread = tool:FindFirstChild("Spread")
-                if spread and spread:IsA("NumberValue") then
-                    spread.Value = 1
-                end
-            end
-        end
-    end
-end
-
-local function AutoReload(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Heartbeat:Connect(function()
-            for _, tool in pairs(Character:GetChildren()) do
-                if tool:IsA("Tool") then
-                    local ammo = tool:FindFirstChild("Ammo")
-                    if ammo and ammo:IsA("IntValue") and ammo.Value == 0 then
-                        tool:Activate()
-                    end
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function RapidMelee(enabled)
-    if enabled then
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") and tool:FindFirstChild("Melee") then
-                local cooldown = tool:FindFirstChild("Cooldown")
-                if cooldown and cooldown:IsA("NumberValue") then
-                    cooldown.Value = 0
-                end
-            end
-        end
-    else
-        for _, tool in pairs(Character:GetChildren()) do
-            if tool:IsA("Tool") and tool:FindFirstChild("Melee") then
-                local cooldown = tool:FindFirstChild("Cooldown")
-                if cooldown and cooldown:IsA("NumberValue") then
-                    cooldown.Value = 1
-                end
-            end
-        end
-    end
-end
-
-local function WallRun(enabled)
-    local connection
-    if enabled then
-        connection = RunService.Stepped:Connect(function()
-            local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.RightVector * 4)
-            local hit, pos, normal = workspace:FindPartOnRay(ray, Character)
-            if hit then
-                HumanoidRootPart.Velocity = Vector3.new(0, 20, 0)
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function DoubleJump(enabled)
-    local jumps = 0
-    local connection
-    if enabled then
-        connection = Humanoid.StateChanged:Connect(function(oldState, newState)
-            if newState == Enum.HumanoidStateType.Landed then
-                jumps = 0
-            elseif newState == Enum.HumanoidStateType.Jumping then
-                if jumps < 1 then
-                    jumps = jumps + 1
-                    Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                end
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function AirDash(enabled)
-    local connection
-    if enabled then
-        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftShift and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
-                local direction = HumanoidRootPart.CFrame.LookVector
-                HumanoidRootPart.Velocity = direction * 100
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function Slide(enabled)
-    local connection
-    if enabled then
-        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if not gameProcessed and input.KeyCode == Enum.KeyCode.C and Humanoid:GetState() == Enum.HumanoidStateType.Running then
-                Humanoid.Sit = true
-                HumanoidRootPart.Velocity = HumanoidRootPart.CFrame.LookVector * 50
-                wait(1)
-                Humanoid.Sit = false
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function Grapple(enabled)
-    local tool = Instance.new("Tool")
-    tool.Name = "Grapple"
-    tool.Parent = LocalPlayer.Backpack
-
-    local function Grapple()
-        local mouse = LocalPlayer:GetMouse()
-        local target = mouse.Hit.Position
-        local direction = (target - HumanoidRootPart.Position).Unit
-        HumanoidRootPart.Velocity = direction * 100
-    end
-
-    if enabled then
-        tool.Activated:Connect(Grapple)
-    else
-        tool:Destroy()
-    end
-end
-
-local function SpeedBoost(enabled)
-    if enabled then
-        Humanoid.WalkSpeed = Humanoid.WalkSpeed * 2
-    else
-        Humanoid.WalkSpeed = 16
-    end
-end
-
-local function JumpBoost(enabled)
-    if enabled then
-        Humanoid.JumpPower = Humanoid.JumpPower * 2
-    else
-        Humanoid.JumpPower = 50
-    end
-end
-
 local function Levitation(enabled)
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
             HumanoidRootPart.Velocity = Vector3.new(0, 5, 0)
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-        end
-    end
-end
-
-local function Blink(enabled)
-    local connection
-    if enabled then
-        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
-                local direction = HumanoidRootPart.CFrame.LookVector
-                HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + direction * 20
-            end
         end)
     else
         if connection then
@@ -1590,11 +1141,7 @@ for i, category in ipairs(Categories) do
     Sections[category.name] = CreateSection(category.name)
 end
 
--- Características
-
-
-
--- Características actualizadas
+-- Características actualizadas (removidas las que no funcionan)
 local MovementFeatures = {
     {name = "Fly", callback = ToggleFly},
     {name = "Speed", callback = ToggleSpeed, slider = true, min = 16, max = 200, default = 16},
@@ -1603,40 +1150,19 @@ local MovementFeatures = {
     {name = "NoClip", callback = NoClip},
     {name = "BunnyHop", callback = BunnyHop},
     {name = "WallRun", callback = WallRun},
-    {name = "DoubleJump", callback = DoubleJump},
-    {name = "AirDash", callback = AirDash},
-    {name = "Slide", callback = Slide},
-    {name = "Grapple", callback = Grapple},
-    {name = "SpeedBoost", callback = SpeedBoost},
-    {name = "JumpBoost", callback = JumpBoost},
-    {name = "Levitation", callback = Levitation},
-    {name = "Blink", callback = Blink}
+    {name = "Levitation", callback = Levitation}
 }
 
 local CombatFeatures = {
-    {name = "GodMode", callback = GodMode},
-    {name = "KillAura", callback = KillAura},
-    {name = "AutoParry", callback = AutoParry},
     {name = "Reach", callback = Reach},
     {name = "AutoDodge", callback = AutoDodge},
     {name = "AutoAim", callback = AutoAim},
-    {name = "RapidFire", callback = RapidFire},
-    {name = "InfiniteAmmo", callback = InfiniteAmmo},
     {name = "DamageMultiplier", callback = DamageMultiplier},
-    {name = "AutoBlock", callback = AutoBlock},
-    {name = "CriticalHit", callback = CriticalHit},
-    {name = "Aimbot", callback = Aimbot},
-    {name = "SilentAim", callback = SilentAim},
-    {name = "Wallbang", callback = Wallbang},
     {name = "InstantKill", callback = InstantKill},
     {name = "AutoHeal", callback = AutoHeal},
-    {name = "Triggerbot", callback = Triggerbot},
     {name = "SpinBot", callback = SpinBot},
     {name = "AntiAim", callback = AntiAim},
-    {name = "HitboxExpander", callback = HitboxExpander},
-    {name = "WeaponMods", callback = WeaponMods},
-    {name = "AutoReload", callback = AutoReload},
-    {name = "RapidMelee", callback = RapidMelee}
+    {name = "HitboxExpander", callback = HitboxExpander}
 }
 
 local VisualFeatures = {
