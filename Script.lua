@@ -32,6 +32,9 @@ local StartSize = nil
 local SavedPositions = {}
 local RespawnPoint = nil
 
+-- Tabla para almacenar el estado de las funciones
+local EnabledFeatures = {}
+
 -- Sistema de idiomas (ahora por defecto en español)
 local Languages = {
     ["Español"] = {
@@ -519,6 +522,7 @@ local function CreateToggle(name, section, callback)
     
     local function Toggle()
         Enabled = not Enabled
+        EnabledFeatures[name] = Enabled
         local Goal = {
             BackgroundColor3 = Enabled and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(60, 60, 60),
             Position = Enabled and UDim2.new(0, 22, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
@@ -615,6 +619,7 @@ local function CreateSlider(name, section, callback, min, max, default)
         Value = math.floor(min + ((max - min) * sizeX))
         SliderFill.Size = UDim2.new(sizeX, 0, 1, 0)
         Label.Text = Texts.features[name] .. ": " .. Value
+        EnabledFeatures[name] = Value
         callback(Value)
     end
     
@@ -644,6 +649,7 @@ end
 
 -- Funciones de habilidades mejoradas
 local function ToggleFly(enabled)
+    EnabledFeatures["Fly"] = enabled
     if enabled then
         local BG = Instance.new("BodyGyro", HumanoidRootPart)
         BG.P = 9e4
@@ -688,15 +694,18 @@ local function ToggleFly(enabled)
 end
 
 local function ToggleSpeed(value)
+    EnabledFeatures["Speed"] = value
     Humanoid.WalkSpeed = value
 end
 
 local function ToggleSuperJump(value)
+    EnabledFeatures["SuperJump"] = value
     Humanoid.JumpPower = value
     Humanoid.JumpHeight = 7.2
 end
 
 local function InfiniteJump(enabled)
+    EnabledFeatures["InfiniteJump"] = enabled
     local connection
     if enabled then
         connection = UserInputService.JumpRequest:Connect(function()
@@ -710,6 +719,7 @@ local function InfiniteJump(enabled)
 end
 
 local function NoClip(enabled)
+    EnabledFeatures["NoClip"] = enabled
     local connection
     if enabled then
         connection = RunService.Stepped:Connect(function()
@@ -732,6 +742,7 @@ local function NoClip(enabled)
 end
 
 local function Reach(enabled)
+    EnabledFeatures["Reach"] = enabled
     if enabled then
         for _, tool in pairs(Character:GetChildren()) do
             if tool:IsA("Tool") then
@@ -757,6 +768,7 @@ local function Reach(enabled)
 end
 
 local function AutoDodge(enabled)
+    EnabledFeatures["AutoDodge"] = enabled
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
@@ -778,6 +790,7 @@ local function AutoDodge(enabled)
 end
 
 local function AutoAim(enabled)
+    EnabledFeatures["AutoAim"] = enabled
     local connection
     if enabled then
         connection = RunService.RenderStepped:Connect(function()
@@ -804,6 +817,7 @@ local function AutoAim(enabled)
 end
 
 local function DamageMultiplier(enabled)
+    EnabledFeatures["DamageMultiplier"] = enabled
     if enabled then
         for _, tool in pairs(Character:GetChildren()) do
             if tool:IsA("Tool") then
@@ -826,6 +840,7 @@ local function DamageMultiplier(enabled)
 end
 
 local function InstantKill(enabled)
+    EnabledFeatures["InstantKill"] = enabled
     if enabled then
         for _, tool in pairs(Character:GetChildren()) do
             if tool:IsA("Tool") then
@@ -848,6 +863,7 @@ local function InstantKill(enabled)
 end
 
 local function AutoHeal(enabled)
+    EnabledFeatures["AutoHeal"] = enabled
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
@@ -863,6 +879,7 @@ local function AutoHeal(enabled)
 end
 
 local function BunnyHop(enabled)
+    EnabledFeatures["BunnyHop"] = enabled
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
@@ -878,6 +895,7 @@ local function BunnyHop(enabled)
 end
 
 local function SpinBot(enabled)
+    EnabledFeatures["SpinBot"] = enabled
     local connection
     if enabled then
         connection = RunService.RenderStepped:Connect(function()
@@ -891,6 +909,7 @@ local function SpinBot(enabled)
 end
 
 local function AntiAim(enabled)
+    EnabledFeatures["AntiAim"] = enabled
     local connection
     if enabled then
         connection = RunService.RenderStepped:Connect(function()
@@ -904,24 +923,34 @@ local function AntiAim(enabled)
 end
 
 local function HitboxExpander(enabled)
-    if enabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
-                player.Character.HumanoidRootPart.Transparency = 0.5
-            end
+    EnabledFeatures["HitboxExpander"] = enabled
+    local function expandHitbox(player)
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.Size = enabled and Vector3.new(10, 10, 10) or Vector3.new(2, 2, 1)
+            player.Character.HumanoidRootPart.Transparency = enabled and 0.5 or 1
         end
+    end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        expandHitbox(player)
+    end
+    
+    local connection
+    if enabled then
+        connection = Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                expandHitbox(player)
+            end)
+        end)
     else
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
-                player.Character.HumanoidRootPart.Transparency = 1
-            end
+        if connection then
+            connection:Disconnect()
         end
     end
 end
 
 local function Levitation(enabled)
+    EnabledFeatures["Levitation"] = enabled
     local connection
     if enabled then
         connection = RunService.Heartbeat:Connect(function()
@@ -935,6 +964,7 @@ local function Levitation(enabled)
 end
 
 local function Telekinesis(enabled)
+    EnabledFeatures["Telekinesis"] = enabled
     local mouse = LocalPlayer:GetMouse()
     local heldObject = nil
     local connection
@@ -978,6 +1008,7 @@ end
 
 -- Implementación mejorada del ESP
 local function ESP(enabled)
+    EnabledFeatures["ESP"] = enabled
     local ESPFolder = Instance.new("Folder")
     ESPFolder.Name = "ESPFolder"
     ESPFolder.Parent = game.CoreGui
