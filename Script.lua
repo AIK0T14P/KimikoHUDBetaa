@@ -1,5 +1,5 @@
 -- Services
-ocal Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -38,7 +38,7 @@ local EnabledFeatures = {}
 
 -- Sistema de idiomas (ahora por defecto en español)
 local Languages = {
-    ["Español"] = {
+    [Español"] = {
         categories = {
             Movement = "Movimiento",
             Combat = "Combate",
