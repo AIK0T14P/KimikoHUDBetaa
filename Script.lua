@@ -37,7 +37,7 @@ local RespawnPoint = nil
 local EnabledFeatures = {}
 
 -- Sistema de idiomas (ahora por defecto en español)
-local Languages = {
+lcal Languages = {
     ["Español"] = {
         categories = {
             Movement = "Movimiento",
